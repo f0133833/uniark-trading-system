@@ -68,7 +68,7 @@ Requires Python 3.9 or newer.
 
 ```bash
 git clone https://github.com/f0133833/uniark-trading-system.git
-cd YOUR_REPO_NAME
+cd uniark-trading-system
 pip install -r requirements.txt
 ```
 
