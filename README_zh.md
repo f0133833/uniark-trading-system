@@ -54,8 +54,8 @@
 需要 Python 3.9 或更新版本。
 
 ```bash
-git clone https://github.com/f0133833/uniark-trading-system.git
-cd uniark-trading-system
+git clone https://github.com/f0133833/uniark-trading-system.git uniark
+cd uniark
 pip install -r requirements.txt
 ```
 
