@@ -67,8 +67,8 @@ exist publicly as a reference, not as an ongoing service.
 Requires Python 3.9 or newer.
 
 ```bash
-git clone https://github.com/f0133833/uniark-trading-system.git
-cd uniark-trading-system
+git clone https://github.com/f0133833/uniark-trading-system.git uniark
+cd uniark
 pip install -r requirements.txt
 ```
 
