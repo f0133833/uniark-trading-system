@@ -92,6 +92,20 @@ python app.py
 ## 项目演示
 
 ### 主界面
+<img src="images/IMG_1909.png" alt="主界面" width="780">
+
+### K线 + MACD 背离标注示例（牛市背离）
+<img src="images/2.png" alt="牛市背离" width="780">
+
+### 熊市背离示例
+<img src="images/1.png" alt="熊市背离" width="780">
+
+### 多时间框架钻取演示
+<img src="images/IMG_1912.png" alt="多时间框架钻取" width="780">
+
+## 项目演示
+
+### 主界面
 ![主界面截图]<img src="images/IMG_1909.png" alt="Main Interface" width="400">
 
 ### K线 + MACD 背离标注示例（牛市背离）
