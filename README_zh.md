@@ -98,7 +98,7 @@ python app.py
 ![牛市背离示例](images/2.png)
 
 ### 熊市背离示例
-![熊市背离](images/1.png)<img src="images/1.png" alt="Main Interface" width="800">
+![熊市背离]<img src="images/1.png" alt="Main Interface" width="800">
 
 ### 多时间框架钻取演示
 ![钻取模式](images/IMG_1912.png)
