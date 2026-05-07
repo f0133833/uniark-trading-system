@@ -103,6 +103,19 @@ python app.py
 
 Then open `http://127.0.0.1:5000` in a browser. Same workflow as the
 desktop UI, but in-browser.
+## Project Demonstration
+
+### Main Interface
+![Main Interface Screenshot](images/IMG_1909.png)
+
+### K-Line + MACD Divergence Annotation Example (Bullish Divergence)
+![Bullish Divergence Example](images/2.png)
+
+### Multi-Timeframe Drill-Down Demonstration
+![Drill-Down Mode](images/IMG_1912.png)
+
+### Bearish Divergence Example
+![Bearish Divergence](images/1.png)
 
 ### Library use
 
