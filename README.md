@@ -106,16 +106,16 @@ desktop UI, but in-browser.
 ## Project Demonstration
 
 ### Main Interface
-![Main Interface Screenshot](images/IMG_1909.png)
+![Main Interface Screenshot]<img src="images/IMG_1909.png" alt="Main Interface" width="400">
 
 ### K-Line + MACD Divergence Annotation Example (Bullish Divergence)
-![Bullish Divergence Example](images/2.png)
+![Bullish Divergence Example]<img src="images/2.png" alt="Main Interface" width="800">
 
 ### Multi-Timeframe Drill-Down Demonstration
-![Drill-Down Mode](images/IMG_1912.png)
+![Drill-Down Mode]<img src="images/IMG_1912.png" alt="Main Interface" width="400">
 
 ### Bearish Divergence Example
-![Bearish Divergence](images/1.png)
+![Bearish Divergence]<img src="images/1.png" alt="Main Interface" width="800">
 
 ### Library use
 
