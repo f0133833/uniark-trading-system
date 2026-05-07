@@ -95,10 +95,10 @@ python app.py
 ![主界面截图](images/IMG_1909.png)
 
 ### K线 + MACD 背离标注示例（牛市背离）
-![牛市背离示例](images/2.png)
+![牛市背离示例]<img src="images/2.png" alt="Main Interface" width="800">
 
 ### 熊市背离示例
-![熊市背离]<img src="images/1.png" alt="Main Interface" width="800">
+![熊市背离示例]<img src="images/1.png" alt="Main Interface" width="800">
 
 ### 多时间框架钻取演示
 ![钻取模式](images/IMG_1912.png)
