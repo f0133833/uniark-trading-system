@@ -101,7 +101,7 @@ python app.py
 ![熊市背离示例]<img src="images/1.png" alt="Main Interface" width="800">
 
 ### 多时间框架钻取演示
-<img src="images/IMG_1912.png" alt="Main Interface" width="400">
+![钻取模式演示](<img src="images/IMG_1912.png" alt="Main Interface" width="400">
 
 ### 作为库使用
 
