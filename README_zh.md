@@ -92,7 +92,7 @@ python app.py
 ## 项目演示
 
 ### 主界面
-![主界面截图](<img src="images/IMG_1909.png" alt="Main Interface" width="800">)
+![主界面截图]<img src="images/IMG_1909.png" alt="Main Interface" width="400">
 
 ### K线 + MACD 背离标注示例（牛市背离）
 ![牛市背离示例]<img src="images/2.png" alt="Main Interface" width="800">
