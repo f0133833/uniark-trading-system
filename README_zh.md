@@ -161,19 +161,6 @@ MACD 面板上的背离标注:
 │   ├── 2.png           
 │   ├── 3.png           
 │   └── 4.png           
-├── code_zh/                   ← 新增：中文注释版本
-│   ├── data.py                    ← Binance K 线拉取           
-│   ├── indicator.py               ← EMA、MACD 计算           
-│   ├── divergence.py              ← 核心算法(注释详尽)           
-│   ├── plot.py                    ← 基础绘图(遗留)           
-│   ├── plot_helpers.py            ← 背离标注辅助           
-│   ├── plot_kline.py              ← 多币种多周期渲染           
-│   ├── navigation.py              ← 钻取导航逻辑           
-│   ├── settings.py                ← 用户设置持久化           
-│   ├── settings_dialog_tk.py      ← Tkinter 设置对话框
-│   ├── main.py                    ← 桌面 UI 入口
-│   ├── app.py                     ← Web UI 入口(Flask)
-│   └── user_settings.json         ← 默认用户设置
 ├── data.py                    ← Binance K 线拉取
 ├── indicator.py               ← EMA、MACD 计算
 ├── divergence.py              ← 核心算法(注释详尽)
