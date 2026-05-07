@@ -171,6 +171,13 @@ to keep the histogram region uncluttered.
 ├── docs/
 │   ├── THEORY.md              ← English theory document
 │   └── THEORY_ZH.md           ← Chinese theory document (original)
+├── images/
+│   ├── IMG_1909.png           
+│   ├── IMG_1912.png           
+│   ├── 1.png
+│   ├── 2.png           
+│   ├── 3.png           
+│   └── 4.png           
 ├── data.py                    ← Binance K-line fetching
 ├── indicator.py               ← EMA, MACD calculations
 ├── divergence.py              ← Core algorithm (heavily commented)
@@ -189,6 +196,8 @@ The algorithmic heart of the project is in
 [`divergence.py`](divergence.py). If you want to understand or extend
 the core logic, start there — the module-level docstring documents
 the hierarchical extension and opposite-barrier rule in detail.
+
+**Chinese Commented Version**: [src_zh/](src_zh/) （for Chinese developers）
 
 ---
 
