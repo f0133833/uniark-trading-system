@@ -197,7 +197,7 @@ The algorithmic heart of the project is in
 the core logic, start there — the module-level docstring documents
 the hierarchical extension and opposite-barrier rule in detail.
 
-**Chinese Commented Version**: [src_zh/](src_zh/) （for Chinese developers）
+**Chinese Commented Version**: [code_zh/](code_zh/) （for Chinese developers）
 
 ---
 
