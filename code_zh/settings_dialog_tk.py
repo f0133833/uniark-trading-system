@@ -157,6 +157,7 @@ def open_settings_dialog(parent, lang, on_save_callback):
     win.configure(bg=BG)
     win.geometry("680x860")
     win.transient(parent)
+    win.update_idletasks()
     win.grab_set()
 
     lang_var = tk.StringVar(value=cur['language'])
