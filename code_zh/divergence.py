@@ -38,7 +38,7 @@
 触发的反向背离会"破坏"任何跨越其触发点的同向高层结构。形式化：
   背离 D 被否决，当且仅当存在一个幸存的反向背离 D' 满足
     (a) D'.s3_end 严格落在 D 的开区间 (s1_start, s3_end) 之内，且
-    (b) D' 在同末段位置 (kind, s3_start, s3_end) 上的最高 level ≠ 1。
+    (b) D' 在同末段位置 (kind, s3_start, s3_end) 上的最高 level > 1。
 
 直观解释：s3_end 是背离的"触发点"（反转生效的瞬间）。一旦这个瞬间
 落在你正在搭建的同向结构内部，结构两端就分属趋势切换前后两个不同
@@ -292,7 +292,7 @@ def _filter_by_opposite_barriers(divs):
     应用反向屏障规则：背离 D 被否决，当且仅当存在一个幸存的反向背离 D'
     满足 (a) D'.s3_end ∈ (D.s1_start, D.s3_end)（触发点严格落在 D 跨度
     开区间内），且 (b) D' 在同末段位置 (kind, s3_start, s3_end) 上的最高
-    level ≠ 1（屏障方必须是趋势级别 L≥2，或与 L≥2 候选共享末段位置）。
+    level > 1（屏障方必须是趋势级别 L≥2，或与 L≥2 候选共享末段位置）。
 
     实现：把候选按 s3_end 升序处理。能屏蔽 D 的反向 D' 必满足
     D'.s3_end < D.s3_end（触发更早），因此处理早触发的候选时，所有可能
@@ -350,8 +350,8 @@ def _filter_by_opposite_barriers(divs):
             if s['kind'] == d['kind']:
                 continue   # 同向不构成屏障
             s_key = (s['kind'], s['s3_start'], s['s3_end'])
-            if max_level_at[s_key] == 1:
-                continue   # 屏障方在同末段位置的最高 level=1，不构成屏障
+            if max_level_at.get(s_key, 0) <= 1:
+                continue   # 屏障方在同末段位置的最高 level 未达 >1，不构成屏障
             # s 的触发点严格落在 d 跨度开区间内？
             if d['s1_start'] < s['s3_end'] < d['s3_end']:
                 blocked = True
