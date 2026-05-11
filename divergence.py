@@ -53,8 +53,8 @@ high-level structure that crosses its trigger point. Formally:
   opposite divergence D' satisfying
     (a) D'.s3_end ∈ (D.s1_start, D.s3_end) (D's trigger point
         falls strictly within D's open span), and
-    (b) D'.level ≠ 1 (the barrier must be a trend-level L≥2
-        divergence).
+    (b) D''s highest level at the same terminal position
+        (kind, s3_start, s3_end) ≠ 1.
 
 Intuition: s3_end is the "trigger point" of a divergence (the moment
 the reversal takes effect). Once that moment lies inside the
@@ -72,6 +72,13 @@ re-reversal), and both should be kept. The only formal feature that
 distinguishes the two cases is level: L≥2 is a trend-level signal
 entitled to "veto" any co-directional structure crossing its
 trigger point; L1 divergences are peers and never shield each other.
+
+The "highest level at the same terminal position" is consistent with
+_dedupe_same_terminal: during structural extension a terminal may
+trigger both L1 and L≥n simultaneously, and dedupe treats them as the
+strongest representation of the same divergence; barrier judgment
+likewise uses the highest level to determine barrier strength, keeping
+the two semantics aligned.
 
 This is a recursive definition: D' may itself be rejected by a
 deeper-nested opposite divergence, in which case D' is no longer a
@@ -330,8 +337,10 @@ def _filter_by_opposite_barriers(divs):
     Apply the opposite-barrier rule: a divergence D is rejected iff
     there exists a surviving opposite divergence D' satisfying
     (a) D'.s3_end ∈ (D.s1_start, D.s3_end) (trigger point lies strictly
-    in D's open span), and (b) D'.level ≠ 1 (the barrier must be a
-    trend-level L≥2 divergence).
+    in D's open span), and (b) D''s highest level at the same terminal
+    position (kind, s3_start, s3_end) ≠ 1 (the barrier must be a
+    trend-level L≥2 divergence, or share a terminal with an L≥2
+    candidate).
 
     Implementation: process candidates in ascending order of s3_end. Any
     opposite D' that can shield D must satisfy D'.s3_end < D.s3_end
@@ -363,9 +372,36 @@ def _filter_by_opposite_barriers(divs):
     "L1 shielded by L≥2" — the only formal feature distinguishing them
     is level. Condition (b) therefore restricts the barrier to L≥2
     divergences.
+
+    Barrier strength is judged by the "highest level at the terminal"
+    -----------------------------------------------------------------
+    During structural extension, the same terminal position
+    (kind, s3_start, s3_end) may simultaneously trigger both L1 and L≥n
+    divergences. The downstream _dedupe_same_terminal treats these
+    candidates as different representations of the same divergence and
+    keeps only the highest-level record. Barrier judgment here follows
+    the same principle: barrier strength is determined by "the highest
+    level reached at this position among the raw candidates", not by
+    the level of any specific record. So even if the higher-level
+    candidate is itself shielded by another barrier, the L1 candidate
+    surviving at the same terminal still acts as a barrier at the full
+    (highest) strength; conversely, a pure L1 (no higher-level
+    candidate at the same terminal) still does not constitute a
+    barrier.
     """
     if not divs:
         return divs
+
+    # Pre-compute the highest level reached at each (kind, s3_start, s3_end)
+    # terminal position among the raw candidates. Barrier strength is judged
+    # from this map, consistent with _dedupe_same_terminal's semantics:
+    # multi-level candidates at the same terminal are treated as different
+    # representations of the same divergence, judged by the strongest one.
+    max_level_at = {}
+    for d in divs:
+        key = (d['kind'], d['s3_start'], d['s3_end'])
+        if d['level'] > max_level_at.get(key, 0):
+            max_level_at[key] = d['level']
 
     # Sort by trigger point (s3_end) ascending; for ties, by level
     # ascending (only for stable ordering)
@@ -380,9 +416,10 @@ def _filter_by_opposite_barriers(divs):
         for s in survivors:
             if s['kind'] == d['kind']:
                 continue   # Same direction — does not constitute a barrier
-            if s['level'] == 1:
-                continue   # L1 reversed divergence cannot be a barrier
-                           # (the barrier must be L≥2)
+            s_key = (s['kind'], s['s3_start'], s['s3_end'])
+            if max_level_at[s_key] == 1:
+                continue   # Barrier's highest level at this terminal is 1
+                           # → does not constitute a barrier
             # Does s's trigger point lie strictly inside d's open span?
             if d['s1_start'] < s['s3_end'] < d['s3_end']:
                 blocked = True
@@ -475,11 +512,12 @@ def find_three_segment_divergences(hist_series, low_series, high_series,
                                     None = exhaustive
     block_by_opposite : bool        Whether to apply the opposite-barrier
                                     rule (default True). A divergence that
-                                    crosses a surviving L≥2 opposite
-                                    divergence is rejected (L1 reversed
-                                    divergences do not act as barriers).
-                                    Set to False to obtain unfiltered
-                                    raw candidates.
+                                    crosses a surviving opposite divergence
+                                    D' is rejected when D''s highest level
+                                    at its terminal position is ≥2 (a pure
+                                    L1 reversed divergence does not act as
+                                    a barrier). Set to False to obtain
+                                    unfiltered raw candidates.
 
     Returns
     -------
