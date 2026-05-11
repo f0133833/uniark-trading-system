@@ -49,10 +49,12 @@ Opposite-barrier rule
 ---------------------
 A triggered opposite-direction divergence "destroys" any same-direction
 high-level structure that crosses its trigger point. Formally:
-  A Level-k≥2 divergence D is rejected iff there exists a surviving
-  opposite divergence D' such that
-    D'.s3_end ∈ (D.s1_start, D.s3_end)
-  i.e. D's trigger point falls strictly within D's open span.
+  A divergence D is rejected iff there exists a surviving
+  opposite divergence D' satisfying
+    (a) D'.s3_end ∈ (D.s1_start, D.s3_end) (D's trigger point
+        falls strictly within D's open span), and
+    (b) D'.level ≠ 1 (the barrier must be a trend-level L≥2
+        divergence).
 
 Intuition: s3_end is the "trigger point" of a divergence (the moment
 the reversal takes effect). Once that moment lies inside the
@@ -60,21 +62,35 @@ co-directional structure you are trying to build, the two ends of the
 structure belong to two different mechanisms — one before and one
 after the trend switch — and must not be merged into a single P.
 
+Semantics of (b): two adjacent same-level L1 reversed divergences
+(e.g. an S1+S2+S3 bullish-L1 immediately followed by an S2+S3+S4
+bearish-L1) are geometrically symmetric with "L1 shielded by L≥2":
+the former's trigger point also lies strictly within the latter's
+open span. But L1+L1 is the canonical "twin-reversal" signal of a
+market turn (downside force decay → bounce → bounce force decay →
+re-reversal), and both should be kept. The only formal feature that
+distinguishes the two cases is level: L≥2 is a trend-level signal
+entitled to "veto" any co-directional structure crossing its
+trigger point; L1 divergences are peers and never shield each other.
+
 This is a recursive definition: D' may itself be rejected by a
 deeper-nested opposite divergence, in which case D' is no longer a
 valid barrier. Processing in ascending order of s3_end (earliest
 trigger decided first), one linear pass converges.
 
-Note: this rule is strictly stronger than "opposite span fully
+Note: condition (a) is strictly stronger than "opposite span fully
 contained" — if D'.span ⊆ D.span, then D'.s3_end necessarily lies in
-(D.s1_start, D.s3_end]. So the older "containment" criterion is a
-special case of the new rule. When D' starts before D (the two
-overlap but neither contains the other), the new rule still correctly
-shields D, which is exactly the bug fix.
+(D.s1_start, D.s3_end]. When D' starts before D (the two overlap but
+neither contains the other), condition (a) still captures it
+correctly, which is exactly the first-fix scenario.
 
-Level 1 (the base three-segment) has a span too short (4 segments)
-to contain any opposite-divergence trigger point in the strict open
-interval, so Level-1 is never rejected by the barrier rule.
+L1 as the shielded party still participates: L1's single
+opposite-direction S2 segment can itself serve as the S_last of
+some L≥2 opposite divergence, whose trigger point s3_end equals
+L1.S2.end and falls strictly within L1's open interval
+(S1.start, S3.end). In that case L1's S1 and S3 belong to two
+different mechanisms — one before and one after the trend switch
+— and the rule shields L1 accordingly.
 
 Public API (still a single function):
     find_three_segment_divergences(hist, low, high,
@@ -311,10 +327,11 @@ def _scan_levels(segs, p_sign, low_series, high_series,
 # ─────────────────────────────────────────────────────────────────────────────
 def _filter_by_opposite_barriers(divs):
     """
-    Apply the opposite-barrier rule: a Level-k≥2 divergence D is rejected
-    iff there exists a surviving opposite divergence D' such that
-    D'.s3_end ∈ (D.s1_start, D.s3_end) (D's trigger point lies strictly
-    in D's open span).
+    Apply the opposite-barrier rule: a divergence D is rejected iff
+    there exists a surviving opposite divergence D' satisfying
+    (a) D'.s3_end ∈ (D.s1_start, D.s3_end) (trigger point lies strictly
+    in D's open span), and (b) D'.level ≠ 1 (the barrier must be a
+    trend-level L≥2 divergence).
 
     Implementation: process candidates in ascending order of s3_end. Any
     opposite D' that can shield D must satisfy D'.s3_end < D.s3_end
@@ -322,9 +339,30 @@ def _filter_by_opposite_barriers(divs):
     triggering candidate, all possible inner barriers are already
     determined. One linear pass suffices.
 
-    Level-1 candidates always survive: a 3-segment r-g-r or g-r-g block
-    has only 1 opposite-color segment in its open interval, which
-    cannot host an opposite-divergence trigger point.
+    L1 as the shielded party still participates
+    -------------------------------------------
+    An earlier version let level<2 candidates survive unconditionally,
+    on the grounds that "a 3-segment r-g-r or g-r-g block has only 1
+    opposite-color segment in its open interval, which cannot host an
+    opposite divergence". That reasoning conflates "opposite
+    divergence" with "the trigger point of an opposite divergence".
+    L1's single opposite S2 segment can itself serve as the S_last of
+    some L≥2 opposite divergence, and its endpoint is precisely
+    that divergence's trigger point s3_end, falling strictly within
+    L1's open interval (S1.start, S3.end). This is exactly the case
+    the barrier rule is meant to catch: L1's two ends S1 and S3
+    belong to two different mechanisms — one before and one after the
+    trend switch — and must not be merged into a single P.
+
+    L1 does not act as the barrier
+    ------------------------------
+    Two adjacent same-level L1 reversed divergences (e.g. an S1+S2+S3
+    bullish-L1 immediately followed by an S2+S3+S4 bearish-L1) are the
+    canonical "twin-reversal" signal of a market turn and both should
+    be kept. This configuration is geometrically symmetric with
+    "L1 shielded by L≥2" — the only formal feature distinguishing them
+    is level. Condition (b) therefore restricts the barrier to L≥2
+    divergences.
     """
     if not divs:
         return divs
@@ -338,14 +376,13 @@ def _filter_by_opposite_barriers(divs):
 
     survivors = []
     for d in sorted_divs:
-        if d['level'] < 2:
-            survivors.append(d)
-            continue
-
         blocked = False
         for s in survivors:
             if s['kind'] == d['kind']:
                 continue   # Same direction — does not constitute a barrier
+            if s['level'] == 1:
+                continue   # L1 reversed divergence cannot be a barrier
+                           # (the barrier must be L≥2)
             # Does s's trigger point lie strictly inside d's open span?
             if d['s1_start'] < s['s3_end'] < d['s3_end']:
                 blocked = True
@@ -437,9 +474,10 @@ def find_three_segment_divergences(hist_series, low_series, high_series,
                                     2    = also detect P+S4+S5
                                     None = exhaustive
     block_by_opposite : bool        Whether to apply the opposite-barrier
-                                    rule (default True). A Level-k≥2
-                                    divergence containing a surviving
-                                    opposite divergence is rejected.
+                                    rule (default True). A divergence that
+                                    crosses a surviving L≥2 opposite
+                                    divergence is rejected (L1 reversed
+                                    divergences do not act as barriers).
                                     Set to False to obtain unfiltered
                                     raw candidates.
 
