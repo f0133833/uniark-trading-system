@@ -54,7 +54,7 @@ high-level structure that crosses its trigger point. Formally:
     (a) D'.s3_end ∈ (D.s1_start, D.s3_end) (D's trigger point
         falls strictly within D's open span), and
     (b) D''s highest level at the same terminal position
-        (kind, s3_start, s3_end) ≠ 1.
+        (kind, s3_start, s3_end) > 1.
 
 Intuition: s3_end is the "trigger point" of a divergence (the moment
 the reversal takes effect). Once that moment lies inside the
@@ -338,7 +338,7 @@ def _filter_by_opposite_barriers(divs):
     there exists a surviving opposite divergence D' satisfying
     (a) D'.s3_end ∈ (D.s1_start, D.s3_end) (trigger point lies strictly
     in D's open span), and (b) D''s highest level at the same terminal
-    position (kind, s3_start, s3_end) ≠ 1 (the barrier must be a
+    position (kind, s3_start, s3_end) > 1 (the barrier must be a
     trend-level L≥2 divergence, or share a terminal with an L≥2
     candidate).
 
@@ -417,8 +417,8 @@ def _filter_by_opposite_barriers(divs):
             if s['kind'] == d['kind']:
                 continue   # Same direction — does not constitute a barrier
             s_key = (s['kind'], s['s3_start'], s['s3_end'])
-            if max_level_at[s_key] == 1:
-                continue   # Barrier's highest level at this terminal is 1
+            if max_level_at.get(s_key, 0) <= 1:
+                continue   # Highest level at this terminal is not > 1
                            # → does not constitute a barrier
             # Does s's trigger point lie strictly inside d's open span?
             if d['s1_start'] < s['s3_end'] < d['s3_end']:
