@@ -8,6 +8,7 @@ discussing market structure.
 > **中文版 README:** [README_zh.md](README_zh.md)
 > **理论文档(中文):** [docs/THEORY_ZH.md](docs/THEORY_ZH.md)
 > **Theory document (English):** [docs/THEORY.md](docs/THEORY.md)
+> **Library quick reference:** [docs/LIBRARY.md](docs/LIBRARY.md) · **Full usage tutorial:** [docs/TUTORIAL.md](docs/TUTORIAL.md)
 
 ---
 
@@ -136,8 +137,14 @@ divs = find_three_segment_divergences(
 )
 ```
 
-See the docstring of `find_three_segment_divergences` for the full
-return-value schema.
+**Library documentation:**
+
+- 📘 **[docs/LIBRARY.md](docs/LIBRARY.md)** — Quick reference (API signature, return-field schema, common call patterns, parameter cheatsheet).
+- 📖 **[docs/TUTORIAL.md](docs/TUTORIAL.md)** — Full usage tutorial (input contracts, hands-on examples, parameter tuning rationale, minimal visualization recipe, common pitfalls).
+
+The module-level docstring inside `divergence.py` itself remains the
+authoritative algorithm specification — the hierarchical-extension
+semantics and the opposite-barrier rule are documented there in detail.
 
 ---
 
@@ -170,7 +177,11 @@ to keep the histogram region uncluttered.
 ├── requirements.txt
 ├── docs/
 │   ├── THEORY.md              ← English theory document
-│   └── THEORY_ZH.md           ← Chinese theory document (original)
+│   ├── THEORY_ZH.md           ← Chinese theory document (original)
+│   ├── LIBRARY.md             ← English library quick reference
+│   ├── LIBRARY_ZH.md          ← Chinese library quick reference
+│   ├── TUTORIAL.md            ← English full usage tutorial
+│   └── TUTORIAL_ZH.md         ← Chinese full usage tutorial
 ├── images/
 │   ├── IMG_1909.png           
 │   ├── IMG_1912.png           
@@ -196,6 +207,9 @@ The algorithmic heart of the project is in
 [`divergence.py`](divergence.py). If you want to understand or extend
 the core logic, start there — the module-level docstring documents
 the hierarchical extension and opposite-barrier rule in detail.
+For end-user-oriented documentation on how to use `divergence.py` as
+a standalone library, see [docs/LIBRARY.md](docs/LIBRARY.md) and
+[docs/TUTORIAL.md](docs/TUTORIAL.md).
 
 **Chinese Commented Version**: [code_zh/](code_zh/) （for Chinese developers）
 

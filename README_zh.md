@@ -7,6 +7,7 @@
 > **English README:** [README.md](README.md)
 > **理论文档:** [docs/THEORY_ZH.md](docs/THEORY_ZH.md)
 > **Theory in English:** [docs/THEORY.md](docs/THEORY.md)
+> **库快速参考:** [docs/LIBRARY_ZH.md](docs/LIBRARY_ZH.md) · **完整使用教程:** [docs/TUTORIAL_ZH.md](docs/TUTORIAL_ZH.md)
 
 ---
 
@@ -121,7 +122,13 @@ divs = find_three_segment_divergences(
 )
 ```
 
-完整返回字段见 `find_three_segment_divergences` 的 docstring。
+**库文档:**
+
+- 📘 **[docs/LIBRARY_ZH.md](docs/LIBRARY_ZH.md)** —— 快速参考(API 签名、返回字段表、常用调用模式、参数调优速查)。
+- 📖 **[docs/TUTORIAL_ZH.md](docs/TUTORIAL_ZH.md)** —— 完整使用教程(输入契约、上手样例、参数调优依据、最小可视化配方、常见坑)。
+
+`divergence.py` 模块顶部的 docstring 仍是算法规范的权威参考 ——
+分层扩展语义、反向屏障规则的详细定义都在那里。
 
 ---
 
@@ -153,7 +160,11 @@ MACD 面板上的背离标注:
 ├── requirements.txt
 ├── docs/
 │   ├── THEORY.md              ← 英文理论文档
-│   └── THEORY_ZH.md           ← 中文理论文档(原版)
+│   ├── THEORY_ZH.md           ← 中文理论文档(原版)
+│   ├── LIBRARY.md             ← 英文库快速参考
+│   ├── LIBRARY_ZH.md          ← 中文库快速参考
+│   ├── TUTORIAL.md            ← 英文完整使用教程
+│   └── TUTORIAL_ZH.md         ← 中文完整使用教程
 ├── images/
 │   ├── IMG_1909.png           
 │   ├── IMG_1912.png           
@@ -178,6 +189,8 @@ MACD 面板上的背离标注:
 项目的算法核心在 [`divergence.py`](divergence.py)。如果你想理解或
 扩展核心逻辑,从那里开始 —— 模块级别的 docstring 详细说明了
 分层扩展和反向屏障规则。
+如果你想把 `divergence.py` 作为独立库使用,看面向使用者的文档:
+[docs/LIBRARY_ZH.md](docs/LIBRARY_ZH.md) 和 [docs/TUTORIAL_ZH.md](docs/TUTORIAL_ZH.md)。
 
 ## 中文注释版本
 
