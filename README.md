@@ -67,11 +67,41 @@ exist publicly as a reference, not as an ongoing service.
 
 Requires Python 3.9 or newer.
 
+The repository ships **two parallel copies of the source code**:
+
+- `code_en/` — English-commented version
+- `code_zh/` — Chinese-commented version
+
+The two are functionally identical and differ only in the language of
+the in-code comments. Install whichever one you prefer. The commands
+below extract just that subdirectory and flatten its contents into a
+local `uniark/` directory, then download `requirements.txt`
+separately.
+
+### English-commented version
+
 ```bash
-git clone https://github.com/f0133833/uniark-trading-system.git uniark
-cd uniark
+mkdir uniark && cd uniark
+curl -L https://github.com/f0133833/uniark-trading-system/tarball/main \
+  | tar -xz --strip-components=2 --wildcards "*/code_en/*"
+curl -LO https://raw.githubusercontent.com/f0133833/uniark-trading-system/main/requirements.txt
 pip install -r requirements.txt
 ```
+
+### Chinese-commented version
+
+```bash
+mkdir uniark && cd uniark
+curl -L https://github.com/f0133833/uniark-trading-system/tarball/main \
+  | tar -xz --strip-components=2 --wildcards "*/code_zh/*"
+curl -LO https://raw.githubusercontent.com/f0133833/uniark-trading-system/main/requirements.txt
+pip install -r requirements.txt
+```
+
+> Tested on Linux and macOS with bash / zsh.
+> On Windows, run the commands inside WSL or Git Bash. Alternatively,
+> download a ZIP from the GitHub repository page and keep only the
+> subdirectory you need.
 
 Dependencies:
 
@@ -83,6 +113,9 @@ Dependencies:
   distributions you may need to install `python3-tk` separately)
 
 ## Usage
+
+After installation the chosen version's files sit directly inside
+`uniark/`, so all commands below are run from that directory.
 
 ### Desktop UI
 
@@ -183,35 +216,37 @@ to keep the histogram region uncluttered.
 │   ├── TUTORIAL.md            ← English full usage tutorial
 │   └── TUTORIAL_ZH.md         ← Chinese full usage tutorial
 ├── images/
-│   ├── IMG_1909.png           
-│   ├── IMG_1912.png           
+│   ├── IMG_1909.png
+│   ├── IMG_1912.png
 │   ├── 1.png
-│   ├── 2.png           
-│   ├── 3.png           
-│   └── 4.png           
-├── data.py                    ← Binance K-line fetching
-├── indicator.py               ← EMA, MACD calculations
-├── divergence.py              ← Core algorithm (heavily commented)
-├── plot.py                    ← Basic chart rendering (legacy)
-├── plot_helpers.py            ← Divergence annotation helpers
-├── plot_kline.py              ← Multi-symbol multi-interval renderer
-├── navigation.py              ← Drill-down navigation logic
-├── settings.py                ← User settings persistence
-├── settings_dialog_tk.py      ← Tkinter settings dialog
-├── main.py                    ← Desktop UI entry point
-├── app.py                     ← Web UI entry point (Flask)
-└── user_settings.json         ← Default user settings
+│   ├── 2.png
+│   ├── 3.png
+│   └── 4.png
+├── code_en/                   ← English-commented source code
+│   ├── data.py                ← Binance K-line fetching
+│   ├── indicator.py           ← EMA, MACD calculations
+│   ├── divergence.py          ← Core algorithm (heavily commented)
+│   ├── plot.py                ← Basic chart rendering (legacy)
+│   ├── plot_helpers.py        ← Divergence annotation helpers
+│   ├── plot_kline.py          ← Multi-symbol multi-interval renderer
+│   ├── navigation.py          ← Drill-down navigation logic
+│   ├── settings.py            ← User settings persistence
+│   ├── settings_dialog_tk.py  ← Tkinter settings dialog
+│   ├── main.py                ← Desktop UI entry point
+│   ├── app.py                 ← Web UI entry point (Flask)
+│   └── user_settings.json     ← Default user settings
+└── code_zh/                   ← Chinese-commented source code (mirrors code_en/)
 ```
 
 The algorithmic heart of the project is in
-[`divergence.py`](divergence.py). If you want to understand or extend
-the core logic, start there — the module-level docstring documents
-the hierarchical extension and opposite-barrier rule in detail.
+[`code_en/divergence.py`](code_en/divergence.py) (English-commented)
+or [`code_zh/divergence.py`](code_zh/divergence.py) (Chinese-commented).
+If you want to understand or extend the core logic, start there —
+the module-level docstring documents the hierarchical extension and
+opposite-barrier rule in detail.
 For end-user-oriented documentation on how to use `divergence.py` as
 a standalone library, see [docs/LIBRARY.md](docs/LIBRARY.md) and
 [docs/TUTORIAL.md](docs/TUTORIAL.md).
-
-**Chinese Commented Version**: [code_zh/](code_zh/) （for Chinese developers）
 
 ---
 

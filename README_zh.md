@@ -54,11 +54,38 @@
 
 需要 Python 3.9 或更新版本。
 
+仓库内并列保存了**两份功能完全相同的源代码副本**:
+
+- `code_zh/` —— 中文注释版本
+- `code_en/` —— 英文注释版本
+
+两者代码逻辑一致,只是注释语言不同。选一份安装即可。下面的命令会
+只抽取你选定的那个子目录,把里面的文件平铺到本地 `uniark/` 目录,
+然后单独下载 `requirements.txt`。
+
+### 中文注释版本(推荐中文用户)
+
 ```bash
-git clone https://github.com/f0133833/uniark-trading-system.git uniark
-cd uniark
+mkdir uniark && cd uniark
+curl -L https://github.com/f0133833/uniark-trading-system/tarball/main \
+  | tar -xz --strip-components=2 --wildcards "*/code_zh/*"
+curl -LO https://raw.githubusercontent.com/f0133833/uniark-trading-system/main/requirements.txt
 pip install -r requirements.txt
 ```
+
+### 英文注释版本
+
+```bash
+mkdir uniark && cd uniark
+curl -L https://github.com/f0133833/uniark-trading-system/tarball/main \
+  | tar -xz --strip-components=2 --wildcards "*/code_en/*"
+curl -LO https://raw.githubusercontent.com/f0133833/uniark-trading-system/main/requirements.txt
+pip install -r requirements.txt
+```
+
+> 命令在 Linux / macOS 的 bash、zsh 下测试通过。
+> Windows 用户请在 WSL 或 Git Bash 中执行;或者直接从 GitHub
+> 仓库页面下载 ZIP 包,解压后只保留你需要的那个子目录即可。
 
 依赖:
 
@@ -70,6 +97,9 @@ pip install -r requirements.txt
   额外安装 `python3-tk`)
 
 ## 使用方法
+
+安装完成后,你选定的版本的所有文件已经平铺在 `uniark/` 目录下,
+所以下面的命令都在该目录里运行。
 
 ### 桌面 UI
 
@@ -166,37 +196,34 @@ MACD 面板上的背离标注:
 │   ├── TUTORIAL.md            ← 英文完整使用教程
 │   └── TUTORIAL_ZH.md         ← 中文完整使用教程
 ├── images/
-│   ├── IMG_1909.png           
-│   ├── IMG_1912.png           
+│   ├── IMG_1909.png
+│   ├── IMG_1912.png
 │   ├── 1.png
-│   ├── 2.png           
-│   ├── 3.png           
-│   └── 4.png           
-├── data.py                    ← Binance K 线拉取
-├── indicator.py               ← EMA、MACD 计算
-├── divergence.py              ← 核心算法(注释详尽)
-├── plot.py                    ← 基础绘图(遗留)
-├── plot_helpers.py            ← 背离标注辅助
-├── plot_kline.py              ← 多币种多周期渲染
-├── navigation.py              ← 钻取导航逻辑
-├── settings.py                ← 用户设置持久化
-├── settings_dialog_tk.py      ← Tkinter 设置对话框
-├── main.py                    ← 桌面 UI 入口
-├── app.py                     ← Web UI 入口(Flask)
-└── user_settings.json         ← 默认用户设置
+│   ├── 2.png
+│   ├── 3.png
+│   └── 4.png
+├── code_zh/                   ← 中文注释源码
+│   ├── data.py                ← Binance K 线拉取
+│   ├── indicator.py           ← EMA、MACD 计算
+│   ├── divergence.py          ← 核心算法(注释详尽)
+│   ├── plot.py                ← 基础绘图(遗留)
+│   ├── plot_helpers.py        ← 背离标注辅助
+│   ├── plot_kline.py          ← 多币种多周期渲染
+│   ├── navigation.py          ← 钻取导航逻辑
+│   ├── settings.py            ← 用户设置持久化
+│   ├── settings_dialog_tk.py  ← Tkinter 设置对话框
+│   ├── main.py                ← 桌面 UI 入口
+│   ├── app.py                 ← Web UI 入口(Flask)
+│   └── user_settings.json     ← 默认用户设置
+└── code_en/                   ← 英文注释源码(结构同 code_zh/)
 ```
 
-项目的算法核心在 [`divergence.py`](divergence.py)。如果你想理解或
-扩展核心逻辑,从那里开始 —— 模块级别的 docstring 详细说明了
-分层扩展和反向屏障规则。
+项目的算法核心在 [`code_zh/divergence.py`](code_zh/divergence.py)
+(中文注释)或 [`code_en/divergence.py`](code_en/divergence.py)
+(英文注释)。如果你想理解或扩展核心逻辑,从那里开始 —— 模块级别
+的 docstring 详细说明了分层扩展和反向屏障规则。
 如果你想把 `divergence.py` 作为独立库使用,看面向使用者的文档:
 [docs/LIBRARY_ZH.md](docs/LIBRARY_ZH.md) 和 [docs/TUTORIAL_ZH.md](docs/TUTORIAL_ZH.md)。
-
-## 中文注释版本
-
-为了方便中国开发者阅读，本项目提供带完整中文注释的代码版本：
-
-→ **[code_zh/](code_zh/)** （推荐中国用户使用）
 
 ---
 
