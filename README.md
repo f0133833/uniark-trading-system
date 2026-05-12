@@ -74,16 +74,16 @@ The repository ships **two parallel copies of the source code**:
 
 The two are functionally identical and differ only in the language of
 the in-code comments. Install whichever one you prefer. The commands
-below extract just that subdirectory and flatten its contents into a
-local `uniark/` directory, then download `requirements.txt`
-separately.
+below download the repository tarball, flatten the chosen subdirectory
+into a local `uniark/` directory, and fetch `requirements.txt`.
 
 ### English-commented version
 
 ```bash
 mkdir uniark && cd uniark
-curl -L https://github.com/f0133833/uniark-trading-system/tarball/main \
-  | tar -xz --strip-components=2 --wildcards "*/code_en/*"
+curl -L https://github.com/f0133833/uniark-trading-system/tarball/main | tar -xz
+mv */code_en/* .
+rm -rf f0133833-uniark-trading-system-*
 curl -LO https://raw.githubusercontent.com/f0133833/uniark-trading-system/main/requirements.txt
 pip install -r requirements.txt
 ```
@@ -92,15 +92,16 @@ pip install -r requirements.txt
 
 ```bash
 mkdir uniark && cd uniark
-curl -L https://github.com/f0133833/uniark-trading-system/tarball/main \
-  | tar -xz --strip-components=2 --wildcards "*/code_zh/*"
+curl -L https://github.com/f0133833/uniark-trading-system/tarball/main | tar -xz
+mv */code_zh/* .
+rm -rf f0133833-uniark-trading-system-*
 curl -LO https://raw.githubusercontent.com/f0133833/uniark-trading-system/main/requirements.txt
 pip install -r requirements.txt
 ```
 
-> Tested on Linux and macOS with bash / zsh.
-> On Windows, run the commands inside WSL or Git Bash. Alternatively,
-> download a ZIP from the GitHub repository page and keep only the
+> Tested on Linux (GNU tar) and macOS (BSD tar) with bash / zsh.
+> On Windows, run the commands inside WSL or Git Bash, or download
+> a ZIP from the GitHub repository page and keep only the
 > subdirectory you need.
 
 Dependencies:

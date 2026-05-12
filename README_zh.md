@@ -60,15 +60,16 @@
 - `code_en/` —— 英文注释版本
 
 两者代码逻辑一致,只是注释语言不同。选一份安装即可。下面的命令会
-只抽取你选定的那个子目录,把里面的文件平铺到本地 `uniark/` 目录,
-然后单独下载 `requirements.txt`。
+下载仓库 tarball,把你选定的那个子目录里的文件平铺到本地 `uniark/`
+目录,然后单独下载 `requirements.txt`。
 
 ### 中文注释版本(推荐中文用户)
 
 ```bash
 mkdir uniark && cd uniark
-curl -L https://github.com/f0133833/uniark-trading-system/tarball/main \
-  | tar -xz --strip-components=2 --wildcards "*/code_zh/*"
+curl -L https://github.com/f0133833/uniark-trading-system/tarball/main | tar -xz
+mv */code_zh/* .
+rm -rf f0133833-uniark-trading-system-*
 curl -LO https://raw.githubusercontent.com/f0133833/uniark-trading-system/main/requirements.txt
 pip install -r requirements.txt
 ```
@@ -77,13 +78,14 @@ pip install -r requirements.txt
 
 ```bash
 mkdir uniark && cd uniark
-curl -L https://github.com/f0133833/uniark-trading-system/tarball/main \
-  | tar -xz --strip-components=2 --wildcards "*/code_en/*"
+curl -L https://github.com/f0133833/uniark-trading-system/tarball/main | tar -xz
+mv */code_en/* .
+rm -rf f0133833-uniark-trading-system-*
 curl -LO https://raw.githubusercontent.com/f0133833/uniark-trading-system/main/requirements.txt
 pip install -r requirements.txt
 ```
 
-> 命令在 Linux / macOS 的 bash、zsh 下测试通过。
+> 命令在 Linux(GNU tar)和 macOS(BSD tar)的 bash、zsh 下测试通过。
 > Windows 用户请在 WSL 或 Git Bash 中执行;或者直接从 GitHub
 > 仓库页面下载 ZIP 包,解压后只保留你需要的那个子目录即可。
 
