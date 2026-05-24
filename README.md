@@ -227,7 +227,6 @@ to keep the histogram region uncluttered.
 │   ├── data.py                ← Binance K-line fetching
 │   ├── indicator.py           ← EMA, MACD calculations
 │   ├── divergence.py          ← Core algorithm (heavily commented)
-│   ├── plot.py                ← Basic chart rendering (legacy)
 │   ├── plot_helpers.py        ← Divergence annotation helpers
 │   ├── plot_kline.py          ← Multi-symbol multi-interval renderer
 │   ├── navigation.py          ← Drill-down navigation logic
