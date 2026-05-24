@@ -208,7 +208,6 @@ MACD 面板上的背离标注:
 │   ├── data.py                ← Binance K 线拉取
 │   ├── indicator.py           ← EMA、MACD 计算
 │   ├── divergence.py          ← 核心算法(注释详尽)
-│   ├── plot.py                ← 基础绘图(遗留)
 │   ├── plot_helpers.py        ← 背离标注辅助
 │   ├── plot_kline.py          ← 多币种多周期渲染
 │   ├── navigation.py          ← 钻取导航逻辑
