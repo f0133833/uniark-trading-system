@@ -8,6 +8,7 @@
 > **理论文档:** [docs/THEORY_ZH.md](docs/THEORY_ZH.md)
 > **Theory in English:** [docs/THEORY.md](docs/THEORY.md)
 > **库快速参考:** [docs/LIBRARY_ZH.md](docs/LIBRARY_ZH.md) · **完整使用教程:** [docs/TUTORIAL_ZH.md](docs/TUTORIAL_ZH.md)
+> **代码化方法论笔记:** [docs/NOTES_FOR_DEVELOPERS_ZH.md](docs/NOTES_FOR_DEVELOPERS_ZH.md) · *给想代码化缠论的开发者*
 
 ---
 
@@ -196,7 +197,9 @@ MACD 面板上的背离标注:
 │   ├── LIBRARY.md             ← 英文库快速参考
 │   ├── LIBRARY_ZH.md          ← 中文库快速参考
 │   ├── TUTORIAL.md            ← 英文完整使用教程
-│   └── TUTORIAL_ZH.md         ← 中文完整使用教程
+│   ├── TUTORIAL_ZH.md         ← 中文完整使用教程
+│   ├── NOTES_FOR_DEVELOPERS.md     ← 英文代码化方法论笔记
+│   └── NOTES_FOR_DEVELOPERS_ZH.md  ← 中文代码化方法论笔记
 ├── images/
 │   ├── IMG_1909.png
 │   ├── IMG_1912.png

@@ -9,6 +9,7 @@ discussing market structure.
 > **理论文档(中文):** [docs/THEORY_ZH.md](docs/THEORY_ZH.md)
 > **Theory document (English):** [docs/THEORY.md](docs/THEORY.md)
 > **Library quick reference:** [docs/LIBRARY.md](docs/LIBRARY.md) · **Full usage tutorial:** [docs/TUTORIAL.md](docs/TUTORIAL.md)
+> **Methodology notes:** [docs/NOTES_FOR_DEVELOPERS.md](docs/NOTES_FOR_DEVELOPERS.md) · *for developers attempting to code Chan theory*
 
 ---
 
@@ -215,7 +216,9 @@ to keep the histogram region uncluttered.
 │   ├── LIBRARY.md             ← English library quick reference
 │   ├── LIBRARY_ZH.md          ← Chinese library quick reference
 │   ├── TUTORIAL.md            ← English full usage tutorial
-│   └── TUTORIAL_ZH.md         ← Chinese full usage tutorial
+│   ├── TUTORIAL_ZH.md         ← Chinese full usage tutorial
+│   ├── NOTES_FOR_DEVELOPERS.md     ← English methodology notes
+│   └── NOTES_FOR_DEVELOPERS_ZH.md  ← Chinese methodology notes
 ├── images/
 │   ├── IMG_1909.png
 │   ├── IMG_1912.png
