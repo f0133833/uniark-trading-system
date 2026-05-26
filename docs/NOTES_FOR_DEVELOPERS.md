@@ -289,8 +289,7 @@ To place this project relative to Chan theory:
 | Style | Prose plus examples | Axiom plus deduction |
 | Codability | Depends on the implementer's resolution of contested rules | Directly writable |
 
-Reading this table, the impression should be: **the core skeleton is
-basically Chan's, what is simplified away is the hardest layer to
+Reading this table, the impression should be: **There is a similarity between the core skeleton and Chan's theory, what is simplified away is the hardest layer to
 code, what is strengthened is formal rigor and falsifiability.**
 
 ## 6. Common Pitfalls When Coding Chan Theory
