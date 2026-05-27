@@ -5,11 +5,25 @@
 精确的、可证伪的语言。
 
 > **English README:** [README.md](README.md)
-> **刚开始想入手？** [docs/GETTING_STARTED_ZH.md](docs/GETTING_STARTED_ZH.md) · *给"读了很多但没写一行"的初学者*
-> **理论文档:** [docs/THEORY_ZH.md](docs/THEORY_ZH.md)
-> **Theory in English:** [docs/THEORY.md](docs/THEORY.md)
-> **库快速参考:** [docs/LIBRARY_ZH.md](docs/LIBRARY_ZH.md) · **完整使用教程:** [docs/TUTORIAL_ZH.md](docs/TUTORIAL_ZH.md)
-> **代码化方法论笔记:** [docs/NOTES_FOR_DEVELOPERS_ZH.md](docs/NOTES_FOR_DEVELOPERS_ZH.md) · *给想代码化缠论的开发者*
+
+---
+
+## 文档导览
+
+按阅读顺序：
+
+```
+GETTING_STARTED  →  INTEGRATION_GUIDE  →  LIBRARY  →  TUTORIAL  →  NOTES_FOR_DEVELOPERS
+     入门               进阶集成           API 速查    使用手册        方法论笔记
+```
+
+- **[GETTING_STARTED_ZH](docs/GETTING_STARTED_ZH.md)** —— 写给"读了很多但没写一行"的开发者，五天跑出第一张 K 线图
+- **[INTEGRATION_GUIDE_ZH](docs/INTEGRATION_GUIDE_ZH.md)** —— 从四文件骨架演化到完整背离系统的工程实战
+- **[LIBRARY_ZH](docs/LIBRARY_ZH.md)** —— `divergence.py` 的 API 签名、返回字段、参数速查
+- **[TUTORIAL_ZH](docs/TUTORIAL_ZH.md)** —— 完整调用样例、参数调优依据、常见坑
+- **[NOTES_FOR_DEVELOPERS_ZH](docs/NOTES_FOR_DEVELOPERS_ZH.md)** —— 代码化这类理论的方法论反思
+
+**独立轨道**：[**THEORY_ZH**](docs/THEORY_ZH.md) —— 公理化形式化的六层定义（不依赖代码，可单独阅读）
 
 ---
 

@@ -6,11 +6,25 @@ holders ("holders") who want a precise, falsifiable language for
 discussing market structure.
 
 > **中文版 README:** [README_zh.md](README_zh.md)
-> **Just getting started?** [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) · *for those who've read a lot but haven't written a line*
-> **理论文档(中文):** [docs/THEORY_ZH.md](docs/THEORY_ZH.md)
-> **Theory document (English):** [docs/THEORY.md](docs/THEORY.md)
-> **Library quick reference:** [docs/LIBRARY.md](docs/LIBRARY.md) · **Full usage tutorial:** [docs/TUTORIAL.md](docs/TUTORIAL.md)
-> **Methodology notes:** [docs/NOTES_FOR_DEVELOPERS.md](docs/NOTES_FOR_DEVELOPERS.md) · *for developers attempting to code Chan theory*
+
+---
+
+## Documentation Map
+
+Read in this order:
+
+```
+GETTING_STARTED  →  INTEGRATION_GUIDE  →  LIBRARY  →  TUTORIAL  →  NOTES_FOR_DEVELOPERS
+   Onboarding         Integration         API ref     Manual         Methodology
+```
+
+- **[GETTING_STARTED.md](docs/GETTING_STARTED.md)** — For developers who've read a lot but haven't written a line. Get a K-line chart up in five days.
+- **[INTEGRATION_GUIDE.md](docs/INTEGRATION_GUIDE.md)** *(coming soon; see [Chinese version](docs/INTEGRATION_GUIDE_ZH.md))* — Engineering walkthrough from four-file skeleton to full divergence system
+- **[LIBRARY.md](docs/LIBRARY.md)** — `divergence.py` API signature, return-field schema, parameter cheatsheet
+- **[TUTORIAL.md](docs/TUTORIAL.md)** — Hands-on examples, parameter tuning rationale, common pitfalls
+- **[NOTES_FOR_DEVELOPERS.md](docs/NOTES_FOR_DEVELOPERS.md)** — Methodology notes on coding theories like this one
+
+**Separate track**: [**THEORY.md**](docs/THEORY.md) — Six-layer axiomatic formalization (theory only, no code required)
 
 ---
 
