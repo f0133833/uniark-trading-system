@@ -1,0 +1,234 @@
+"""
+BTC K线分析 - 时间段选择 UI（中英文切换版）
+"""
+import tkinter as tk
+from tkinter import ttk
+import subprocess
+import sys
+import os
+
+_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# ── 配色 ──────────────────────────────────────────────────
+BG        = "#1e1e2e"
+BG_CARD   = "#2a2a3e"
+ACCENT    = "#7c6af7"
+ACCENT2   = "#f7a26a"
+FG        = "#e0e0f0"
+FG_DIM    = "#8888aa"
+SEL_BG    = "#3a3a5e"
+BTN_BG    = "#7c6af7"
+BTN_FG    = "#ffffff"
+BTN_HOVER = "#9b8dff"
+OK_COLOR  = "#50fa7b"
+ERR_COLOR = "#ff5555"
+LANG_BG   = "#2a2a3e"
+LANG_SEL  = "#3a3a5e"
+
+FONT_TITLE  = ("Noto Sans", 13, "bold")
+FONT_OPTION = ("Noto Sans", 12)
+FONT_BTN    = ("Noto Sans", 12, "bold")
+FONT_STATUS = ("Noto Sans", 10)
+FONT_LANG   = ("Noto Sans", 10, "bold")
+
+RANGES = [
+    ("2017-08  ~  2020-05", "17 Aug, 2017", "30 May, 2020"),
+    ("2020-03  ~  2022-11", "17 Mar, 2020", "30 Nov, 2022"),
+    ("2022-10  ~  2025-10", "17 Oct, 2022", "30 Oct, 2025"),
+    ("2025-04  ~  2027-11", "17 Apr, 2025", "30 Nov, 2027"),
+]
+
+# ── 多语言文本 ────────────────────────────────────────────
+I18N = {
+    'en': {
+        'title':       "BTC K-Line Generator",
+        'interval':    "▸  Interval",
+        'weekly':      "Weekly",
+        '3day':        "3-Day",
+        'timerange':   "▸  Time Range",
+        'generate':    "Generate Chart",
+        'generating':  "Generating",
+        'done':        "Done ✓",
+        'error':       "Error ✗",
+    },
+    'zh': {
+        'title':       "BTC K线生成器",
+        'interval':    "▸  周期",
+        'weekly':      "周线",
+        '3day':        "3日线",
+        'timerange':   "▸  时间段",
+        'generate':    "生成图表",
+        'generating':  "正在生成",
+        'done':        "完成 ✓",
+        'error':       "错误 ✗",
+    }
+}
+
+# ── 状态 ──────────────────────────────────────────────────
+lang         = 'en'
+var_interval = None
+var_range    = None
+
+# ── 主窗口 ────────────────────────────────────────────────
+root = tk.Tk()
+root.configure(bg=BG)
+root.geometry("560x570")
+root.resizable(False, False)
+
+# ── 动态控件引用（用于切换语言时更新文字）────────────────
+refs = {}   # key -> widget or list of widgets
+
+def t(key):
+    return I18N[lang][key]
+
+def apply_lang():
+    root.title(t('title'))
+    refs['lbl_interval'].configure(text=t('interval'))
+    refs['btn_weekly'].configure(text=t('weekly'))
+    refs['btn_3day'].configure(text=t('3day'))
+    refs['lbl_timerange'].configure(text=t('timerange'))
+    refs['gen_btn'].configure(text=t('generate'))
+    # 语言切换按钮高亮
+    refs['lang_en'].configure(bg=LANG_SEL if lang=='en' else LANG_BG,
+                              fg=ACCENT   if lang=='en' else FG_DIM)
+    refs['lang_zh'].configure(bg=LANG_SEL if lang=='zh' else LANG_BG,
+                              fg=ACCENT   if lang=='zh' else FG_DIM)
+
+def switch_lang(new_lang):
+    global lang
+    lang = new_lang
+    apply_lang()
+
+# ── 顶部栏：语言切换 ──────────────────────────────────────
+top_bar = tk.Frame(root, bg=BG)
+top_bar.pack(fill="x", padx=30, pady=(14, 0))
+
+tk.Frame(top_bar, bg=BG).pack(side="left", expand=True)   # 弹性空白
+
+lang_frame = tk.Frame(top_bar, bg=BG_CARD, highlightthickness=1,
+                      highlightbackground="#44446a")
+lang_frame.pack(side="right")
+
+btn_en = tk.Label(lang_frame, text="EN", font=FONT_LANG, bg=LANG_SEL,
+                  fg=ACCENT, padx=12, pady=4, cursor="hand2")
+btn_en.pack(side="left")
+btn_en.bind("<Button-1>", lambda e: switch_lang('en'))
+
+tk.Frame(lang_frame, bg="#44446a", width=1).pack(side="left", fill="y")
+
+btn_zh = tk.Label(lang_frame, text="中文", font=FONT_LANG, bg=LANG_BG,
+                  fg=FG_DIM, padx=12, pady=4, cursor="hand2")
+btn_zh.pack(side="left")
+btn_zh.bind("<Button-1>", lambda e: switch_lang('zh'))
+
+refs['lang_en'] = btn_en
+refs['lang_zh'] = btn_zh
+
+# ── 工具函数 ──────────────────────────────────────────────
+def make_section(text_key):
+    lbl = tk.Label(root, text=t(text_key), font=FONT_TITLE, bg=BG, fg=ACCENT)
+    lbl.pack(anchor="w", padx=30, pady=(16, 6))
+    return lbl
+
+def make_card():
+    f = tk.Frame(root, bg=BG_CARD, bd=0, highlightthickness=1,
+                 highlightbackground="#44446a")
+    f.pack(fill="x", padx=30, pady=(0, 4))
+    return f
+
+# ── Interval 选择 ─────────────────────────────────────────
+refs['lbl_interval'] = make_section('interval')
+
+var_interval  = tk.StringVar(value="weekly")
+interval_frame = make_card()
+
+def update_interval_highlight():
+    for val, w in [('weekly', refs['btn_weekly']), ('3day', refs['btn_3day'])]:
+        if var_interval.get() == val:
+            w.configure(bg=SEL_BG, fg=ACCENT)
+        else:
+            w.configure(bg=BG_CARD, fg=FG)
+
+for col, (text_key, val) in enumerate([('weekly','weekly'), ('3day','3day')]):
+    cell = tk.Frame(interval_frame, bg=BG_CARD)
+    cell.grid(row=0, column=col, sticky="nsew", padx=2, pady=2)
+    interval_frame.columnconfigure(col, weight=1)
+    btn = tk.Label(cell, text=t(text_key), font=FONT_OPTION,
+                   bg=SEL_BG if val=='weekly' else BG_CARD,
+                   fg=ACCENT  if val=='weekly' else FG,
+                   cursor="hand2", pady=10)
+    btn.pack(fill="x")
+    def on_interval_click(e, v=val):
+        var_interval.set(v)
+        update_interval_highlight()
+    btn.bind("<Button-1>", on_interval_click)
+    refs[f'btn_{val}'] = btn
+
+# ── Time Range 选择 ───────────────────────────────────────
+refs['lbl_timerange'] = make_section('timerange')
+
+var_range  = tk.IntVar(value=2)
+range_btns = []
+
+def select_range(idx):
+    var_range.set(idx)
+    for i, b in enumerate(range_btns):
+        b.configure(bg=SEL_BG if i==idx else BG_CARD,
+                    fg=ACCENT2 if i==idx else FG)
+
+for idx, (label, _, _) in enumerate(RANGES):
+    card = make_card()
+    btn = tk.Label(card, text=f"  {label}", font=FONT_OPTION,
+                   bg=BG_CARD, fg=FG, anchor="w", pady=9, cursor="hand2")
+    btn.pack(fill="x", padx=8)
+    btn.bind("<Button-1>", lambda e, i=idx: select_range(i))
+    range_btns.append(btn)
+
+select_range(2)
+
+# ── Generate 按钮 ─────────────────────────────────────────
+def generate():
+    idx       = var_range.get()
+    interval  = var_interval.get()
+    start_str = RANGES[idx][1]
+    end_str   = RANGES[idx][2]
+    script    = os.path.join(_DIR, "plot_kline.py")
+    iv_label  = t('weekly') if interval == "weekly" else t('3day')
+
+    status_var.set(f"{t('generating')}  {iv_label}  {RANGES[idx][0]} ...")
+    status_lbl.configure(fg=FG_DIM)
+    root.update()
+
+    result = subprocess.run(
+        [sys.executable, script, interval, start_str, end_str],
+        capture_output=True, text=True
+    )
+    output = (result.stdout + result.stderr).strip()
+    if result.returncode == 0:
+        status_var.set(output if output else t('done'))
+        status_lbl.configure(fg=OK_COLOR)
+    else:
+        status_var.set(output if output else t('error'))
+        status_lbl.configure(fg=ERR_COLOR)
+
+btn_frame = tk.Frame(root, bg=BG)
+btn_frame.pack(pady=18)
+
+gen_btn = tk.Button(btn_frame, text=t('generate'),
+                    font=FONT_BTN, bg=BTN_BG, fg=BTN_FG,
+                    activebackground=BTN_HOVER, activeforeground=BTN_FG,
+                    relief="flat", bd=0, padx=32, pady=10,
+                    cursor="hand2", command=generate)
+gen_btn.pack()
+gen_btn.bind("<Enter>", lambda e: gen_btn.configure(bg=BTN_HOVER))
+gen_btn.bind("<Leave>", lambda e: gen_btn.configure(bg=BTN_BG))
+refs['gen_btn'] = gen_btn
+
+# ── 状态栏 ────────────────────────────────────────────────
+status_var = tk.StringVar(value="")
+status_lbl = tk.Label(root, textvariable=status_var, font=FONT_STATUS,
+                      bg=BG, fg=FG_DIM, wraplength=500, justify="left")
+status_lbl.pack(padx=30, pady=(0, 10))
+
+apply_lang()
+root.mainloop()

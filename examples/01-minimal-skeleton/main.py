@@ -12,7 +12,7 @@
 import matplotlib
 
 # 中文显示兼容：按 Linux / 通用 CJK / Windows / 兜底字体的顺序尝试。
-# 你的系统装了哪个就用哪个，无效字体名会被自动跳过。
+# 系统装了哪个就用哪个，无效字体名会被自动跳过。
 # 注意：此配置必须在 import plot 之前完成，否则 matplotlib 已经初始化、配置不生效。
 matplotlib.rcParams["font.sans-serif"] = [
     "WenQuanYi Micro Hei", "Noto Sans CJK SC", "SimHei", "DejaVu Sans",
