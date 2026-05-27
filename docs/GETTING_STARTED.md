@@ -18,13 +18,13 @@ If you can already produce a K-line chart with MACD on your screen, close this d
 
 ---
 
-## First Principles: You're Not Learning, You're Procrastinating
+## First Principles: Reading and Writing Code Are Two Different States
 
-A blunt truth first:
+One easy-to-miss truth:
 
 > **Reading theory and reading code is not "learning." It is "preparing to learn." Real learning begins the moment you write your first line of code.**
 
-If you've been stuck in the "I'll start in a bit" state for more than 3 days, the problem is not a shortage of knowledge. It is the wrong starting posture.
+If you've been in the "I'll start in a bit" state for more than 3 days, the issue is most likely not a shortage of knowledge — it's how you've been starting.
 
 ### Why You're Stuck
 
@@ -32,7 +32,7 @@ Because the goal you set for yourself is "build a trading system."
 
 This goal is **too big, too abstract, too intimidating** for the brain. So the brain picks an activity that *looks like* progress but is actually treading water — reading more material.
 
-Asking AI to "summarize this open-source project for me" is the same trap. The more AI summaries you read, the more you feel you "get it" — but your fingers still have not touched the keyboard.
+Asking AI to "summarize this open-source project for me" is the same trap. The more AI summaries you read, the more you feel you "get it" — but not a single line of code has been written.
 
 ### The Only Way Out
 
