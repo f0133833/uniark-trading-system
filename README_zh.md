@@ -5,6 +5,7 @@
 精确的、可证伪的语言。
 
 > **English README:** [README.md](README.md)
+> **刚开始想入手？** [docs/GETTING_STARTED_ZH.md](docs/GETTING_STARTED_ZH.md) · *给"读了很多但没写一行"的初学者*
 > **理论文档:** [docs/THEORY_ZH.md](docs/THEORY_ZH.md)
 > **Theory in English:** [docs/THEORY.md](docs/THEORY.md)
 > **库快速参考:** [docs/LIBRARY_ZH.md](docs/LIBRARY_ZH.md) · **完整使用教程:** [docs/TUTORIAL_ZH.md](docs/TUTORIAL_ZH.md)
@@ -192,6 +193,8 @@ MACD 面板上的背离标注:
 ├── LICENSE                    ← MIT 许可证
 ├── requirements.txt
 ├── docs/
+│   ├── GETTING_STARTED_ZH.md       ← 中文初学者指南（给"读了很多但没写一行"的人）
+│   ├── GETTING_STARTED.md          ← 英文初学者指南
 │   ├── THEORY.md              ← 英文理论文档
 │   ├── THEORY_ZH.md           ← 中文理论文档(原版)
 │   ├── LIBRARY.md             ← 英文库快速参考

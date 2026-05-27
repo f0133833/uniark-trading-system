@@ -6,6 +6,7 @@ holders ("holders") who want a precise, falsifiable language for
 discussing market structure.
 
 > **中文版 README:** [README_zh.md](README_zh.md)
+> **Just getting started?** [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) · *for those who've read a lot but haven't written a line*
 > **理论文档(中文):** [docs/THEORY_ZH.md](docs/THEORY_ZH.md)
 > **Theory document (English):** [docs/THEORY.md](docs/THEORY.md)
 > **Library quick reference:** [docs/LIBRARY.md](docs/LIBRARY.md) · **Full usage tutorial:** [docs/TUTORIAL.md](docs/TUTORIAL.md)
@@ -211,6 +212,8 @@ to keep the histogram region uncluttered.
 ├── LICENSE                    ← MIT License
 ├── requirements.txt
 ├── docs/
+│   ├── GETTING_STARTED.md          ← English beginner's guide (for those stuck reading without coding)
+│   ├── GETTING_STARTED_ZH.md       ← Chinese beginner's guide
 │   ├── THEORY.md              ← English theory document
 │   ├── THEORY_ZH.md           ← Chinese theory document (original)
 │   ├── LIBRARY.md             ← English library quick reference
