@@ -258,4 +258,6 @@ Close this document. Open a terminal. Type:
 mkdir my-trading-system && cd my-trading-system && touch data.py
 ```
 
-The rest starts here.
+The rest is up to you.
+
+Wishing you all the best.

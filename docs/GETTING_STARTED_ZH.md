@@ -261,4 +261,6 @@ AI 给你的就是 20 行可运行的代码。你复制粘贴，跑一下，要�
 mkdir my-trading-system && cd my-trading-system && touch data.py
 ```
 
-剩下的事，从这里开始。
+剩下的事，就交给你了。
+
+祝你一切顺利。
