@@ -264,3 +264,238 @@ mkdir my-trading-system && cd my-trading-system && touch data.py
 剩下的事，就交给你了。
 
 祝你一切顺利。
+
+---
+
+## 附录：完整范本代码
+
+下面是这份骨架的精修版——已经清理了冗余、加了文档字符串、规范了风格，可以作为"干净代码长什么样"的参考样本。
+
+**这是参考资料，不是起步材料。**
+
+最理想的用法：先按前面的五天计划自己写一版，跑通之后再回头对照——你会发现自己写的版本和这里的差距其实没那么大，**这种"我也能写出这种代码"的觉察，比直接抄过来用更有价值**。
+
+如果你卡在某个具体细节（比如 `pd.to_datetime` 该怎么传参、`mplfinance` 怎么加副图），也可以来这里查具体的某一段。
+
+### `data.py`
+
+```python
+"""
+数据层：从 Binance 获取 K 线数据
+
+职责单一：把外部数据源的原始响应整理成下游模块能直接使用的 DataFrame。
+如果未来要换数据源（Hyperliquid / OKX / 本地 CSV），只需要修改这个文件，
+indicator.py 和 plot.py 完全不用动——这就是分层的价值。
+"""
+from binance.client import Client
+import pandas as pd
+
+client = Client()
+
+
+def get_weekly_klines(symbol="BTCUSDT", start_str="1 Oct, 2022", end_str=None):
+    """
+    从 Binance 获取周线 K 线数据。
+
+    参数
+    ----
+    symbol : str
+        交易对，例如 "BTCUSDT"、"ETHUSDT"
+    start_str : str
+        起始日期，格式如 "1 Oct, 2022"
+    end_str : str or None
+        结束日期；None 表示拉到最新
+
+    返回
+    ----
+    pd.DataFrame
+        索引为时间（open_time），列为 open / high / low / close / volume
+    """
+    klines = client.get_historical_klines(
+        symbol=symbol,
+        interval=Client.KLINE_INTERVAL_1WEEK,
+        start_str=start_str,
+        end_str=end_str,
+    )
+
+    df = pd.DataFrame(klines, columns=[
+        "open_time", "open", "high", "low", "close", "volume",
+        "close_time", "quote_volume", "count",
+        "taker_buy_base", "taker_buy_quote", "ignore",
+    ])
+
+    # 类型转换：Binance 返回的全是字符串，必须显式转换成数值才能参与计算
+    df["open_time"] = pd.to_datetime(df["open_time"], unit="ms")
+    df["open"]   = pd.to_numeric(df["open"])
+    df["high"]   = pd.to_numeric(df["high"])
+    df["low"]    = pd.to_numeric(df["low"])
+    df["close"]  = pd.to_numeric(df["close"])
+    df["volume"] = pd.to_numeric(df["volume"])
+
+    # 只保留下游需要的 OHLCV 五列，扔掉 Binance 响应里的其他噪声字段
+    df = df.set_index("open_time")
+    df = df[["open", "high", "low", "close", "volume"]]
+
+    return df
+```
+
+### `indicator.py`
+
+```python
+"""
+指标层：纯计算模块
+
+只做数学运算——输入价格序列，输出指标序列。
+不读数据、不画图、不依赖任何外部状态，所以可以独立单元测试。
+
+这是整个系统最容易出 bug 也最值得测试的地方：
+MACD 算错 5%，回测照样能跑，但所有信号都会是错的。
+这种"沉默 bug"非常可怕，务必保持本层纯净。
+"""
+
+
+def calc_ema(series, period):
+    """计算指数移动平均（EMA）"""
+    return series.ewm(span=period, adjust=False).mean()
+
+
+def calc_macd(close, fast=12, slow=26, signal=9):
+    """
+    计算 MACD 三个序列。
+
+    参数
+    ----
+    close : pd.Series
+        收盘价序列
+    fast, slow, signal : int
+        MACD 三个标准周期（默认 12 / 26 / 9）
+
+    返回
+    ----
+    macd_line   : 快线 = EMA(close, fast) - EMA(close, slow)
+    signal_line : 慢线 = EMA(macd_line, signal)
+    macd_hist   : 柱状图 = macd_line - signal_line
+    """
+    ema_fast = calc_ema(close, fast)
+    ema_slow = calc_ema(close, slow)
+    macd_line   = ema_fast - ema_slow
+    signal_line = calc_ema(macd_line, signal)
+    macd_hist   = macd_line - signal_line
+    return macd_line, signal_line, macd_hist
+
+
+def add_indicators(df):
+    """
+    在原 DataFrame 基础上追加 macd / signal / hist 三列。
+
+    注意
+    ----
+    返回新的 DataFrame，**不修改输入**。
+    这样调用方可以安全地链式调用，不用担心副作用。
+    """
+    df = df.copy()
+    macd_dif, macd_dea, macd_hist = calc_macd(df["close"])
+    df["macd"]   = macd_dif
+    df["signal"] = macd_dea
+    df["hist"]   = macd_hist
+    return df
+```
+
+### `plot.py`
+
+```python
+"""
+可视化层：K 线 + 均线 + 成交量 + MACD
+
+输入带指标的 DataFrame，渲染成图。
+不计算任何东西，也不读数据，只负责把数据呈现给人眼。
+"""
+import mplfinance as mpf
+
+
+def get_macd_colors(hist):
+    """根据 MACD 柱值的正负，返回绿/红颜色列表（用于柱状图着色）"""
+    return ["g" if v >= 0 else "r" for v in hist]
+
+
+def plot_weekly(df, title="BTCUSDT Weekly K-Line", last_n=200):
+    """
+    绘制三面板组合图：K 线主图 + 成交量 + MACD。
+
+    参数
+    ----
+    df : pd.DataFrame
+        必须包含 OHLCV 五列以及 macd / signal / hist 三列
+    title : str
+        图表标题（换币种时记得同步修改此参数）
+    last_n : int
+        只显示最后 N 根 K 线，避免历史太长导致挤压
+    """
+    df_plot = df.tail(last_n)
+    macd_colors = get_macd_colors(df_plot["hist"])
+
+    apds = [
+        mpf.make_addplot(df_plot["macd"],   panel=2, color="#1f77b4"),
+        mpf.make_addplot(df_plot["signal"], panel=2, color="#ff7f0e"),
+        mpf.make_addplot(df_plot["hist"],   panel=2, color=macd_colors, type="bar"),
+    ]
+
+    mpf.plot(
+        df_plot,
+        type="candle",
+        style="charles",
+        title=title,
+        ylabel="Price",
+        volume=True,
+        mav=(7, 25, 99),                  # 7/25/99 三条均线
+        addplot=apds,
+        panel_ratios=(4, 1, 2),           # 主图 : 成交量 : MACD = 4 : 1 : 2
+        figsize=(14, 10),
+    )
+```
+
+### `main.py`
+
+```python
+"""
+入口：BTC 周线分析
+
+把三个模块串起来跑：
+    data.py       拉数据
+    indicator.py  算指标
+    plot.py       画图
+
+整个文件保持极简——任何复杂逻辑都该藏在前三个模块里，
+让读者一眼能看完整个数据流。
+"""
+import matplotlib
+
+# 中文显示兼容：按 Linux / 通用 CJK / Windows / 兜底字体的顺序尝试。
+# 你的系统装了哪个就用哪个，无效字体名会被自动跳过。
+# 注意：此配置必须在 import plot 之前完成，否则 matplotlib 已经初始化、配置不生效。
+matplotlib.rcParams["font.sans-serif"] = [
+    "WenQuanYi Micro Hei", "Noto Sans CJK SC", "SimHei", "DejaVu Sans",
+]
+matplotlib.rcParams["axes.unicode_minus"] = False
+
+from data import get_weekly_klines
+from indicator import add_indicators
+from plot import plot_weekly
+
+
+if __name__ == "__main__":
+    df = get_weekly_klines()
+    df = add_indicators(df)
+    plot_weekly(df, last_n=200)
+```
+
+### 跑起来
+
+把四个文件保存在同一目录下，然后：
+
+```bash
+pip install pandas python-binance mplfinance
+python3 main.py
+```
+
+应该弹出一张 BTC 周线 + 均线 + 成交量 + MACD 的组合图。看到这张图的那一刻，整个 MVP 就完成了——你已经从"读理论的人"变成"有代码的人"。
