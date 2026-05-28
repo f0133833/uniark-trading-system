@@ -19,7 +19,7 @@ GETTING_STARTED  →  INTEGRATION_GUIDE  →  LIBRARY  →  TUTORIAL  →  NOTES
 ```
 
 - **[GETTING_STARTED.md](docs/GETTING_STARTED.md)** — For developers who've read a lot but haven't written a line. Get a K-line chart up in five days.
-- **[INTEGRATION_GUIDE.md](docs/INTEGRATION_GUIDE.md)** *(coming soon; see [Chinese version](docs/INTEGRATION_GUIDE_ZH.md))* — Engineering walkthrough from four-file skeleton to full divergence system
+- **[INTEGRATION_GUIDE.md](docs/INTEGRATION_GUIDE.md)** — Engineering walkthrough from four-file skeleton to full divergence system
 - **[LIBRARY.md](docs/LIBRARY.md)** — `divergence.py` API signature, return-field schema, parameter cheatsheet
 - **[TUTORIAL.md](docs/TUTORIAL.md)** — Hands-on examples, parameter tuning rationale, common pitfalls
 - **[NOTES_FOR_DEVELOPERS.md](docs/NOTES_FOR_DEVELOPERS.md)** — Methodology notes on coding theories like this one

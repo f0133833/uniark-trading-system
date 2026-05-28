@@ -1,5 +1,29 @@
 """
 BTC K线分析 - 时间段选择 UI（中英文切换版）
+
+架构说明
+--------
+本文件是桌面入口，做两件事：
+  1. 用 Tkinter 渲染一个"选周期 + 选时段 + 生成"的窗口
+  2. 用户点"生成图表"时，通过 subprocess 调用 plot_kline.py
+
+为什么用 subprocess，而不是直接 `from plot_kline import render_chart`？
+  matplotlib 和 Tkinter 都是 GUI 框架，在同一进程里共用主线程时容易冲突：
+  - matplotlib 的字体配置 / 后端会被 Tk 干扰
+  - 每生成一张图，matplotlib 的 figure 缓存会累积，长时间使用内存涨
+  - 报错栈混在一起难以调试
+
+  用 subprocess 把绘图扔到子进程，每次干净启动、干净退出。代价是启动
+  慢 0.3 秒，但换来稳定性和可调试性，对桌面工具来说很划算。
+
+  Web 版（app.py）不需要 subprocess——Flask 是后端框架，没有 GUI 主线程
+  竞争问题，直接 `import render_chart` 就行。
+
+文件分工
+--------
+  main.py        本文件：Tk 窗口 + 用户输入
+  plot_kline.py  绘图核心：被本文件 subprocess 调用、被 app.py 直接 import
+  app.py        Web 版入口：另一种 UI 形态，共用 plot_kline.py
 """
 import tkinter as tk
 from tkinter import ttk
@@ -126,59 +150,59 @@ refs['lang_zh'] = btn_zh
 
 # ── 工具函数 ──────────────────────────────────────────────
 def make_section(text_key):
-    lbl = tk.Label(root, text=t(text_key), font=FONT_TITLE, bg=BG, fg=ACCENT)
-    lbl.pack(anchor="w", padx=30, pady=(16, 6))
+    lbl = tk.Label(root, text=t(text_key), font=FONT_TITLE,
+                   bg=BG, fg=ACCENT, anchor="w")
+    lbl.pack(fill="x", padx=30, pady=(16, 6))
     return lbl
 
-def make_card():
-    f = tk.Frame(root, bg=BG_CARD, bd=0, highlightthickness=1,
-                 highlightbackground="#44446a")
-    f.pack(fill="x", padx=30, pady=(0, 4))
-    return f
-
-# ── Interval 选择 ─────────────────────────────────────────
+# ── 周期选择 ──────────────────────────────────────────────
 refs['lbl_interval'] = make_section('interval')
 
-var_interval  = tk.StringVar(value="weekly")
-interval_frame = make_card()
+var_interval = tk.StringVar(value="weekly")
+iv_frame = tk.Frame(root, bg=BG)
+iv_frame.pack(fill="x", padx=30)
 
-def update_interval_highlight():
-    for val, w in [('weekly', refs['btn_weekly']), ('3day', refs['btn_3day'])]:
-        if var_interval.get() == val:
-            w.configure(bg=SEL_BG, fg=ACCENT)
-        else:
-            w.configure(bg=BG_CARD, fg=FG)
+def make_interval_btn(parent, value, text_key):
+    btn = tk.Label(parent, text=t(text_key), font=FONT_OPTION,
+                   bg=BG_CARD, fg=FG, padx=20, pady=8,
+                   cursor="hand2", width=12)
+    def select(*_):
+        var_interval.set(value)
+        refs['btn_weekly'].configure(
+            bg=SEL_BG if var_interval.get() == 'weekly' else BG_CARD,
+            fg=ACCENT if var_interval.get() == 'weekly' else FG,
+        )
+        refs['btn_3day'].configure(
+            bg=SEL_BG if var_interval.get() == '3day'  else BG_CARD,
+            fg=ACCENT if var_interval.get() == '3day'  else FG,
+        )
+    btn.bind("<Button-1>", select)
+    return btn, select
 
-for col, (text_key, val) in enumerate([('weekly','weekly'), ('3day','3day')]):
-    cell = tk.Frame(interval_frame, bg=BG_CARD)
-    cell.grid(row=0, column=col, sticky="nsew", padx=2, pady=2)
-    interval_frame.columnconfigure(col, weight=1)
-    btn = tk.Label(cell, text=t(text_key), font=FONT_OPTION,
-                   bg=SEL_BG if val=='weekly' else BG_CARD,
-                   fg=ACCENT  if val=='weekly' else FG,
-                   cursor="hand2", pady=10)
-    btn.pack(fill="x")
-    def on_interval_click(e, v=val):
-        var_interval.set(v)
-        update_interval_highlight()
-    btn.bind("<Button-1>", on_interval_click)
-    refs[f'btn_{val}'] = btn
+btn_weekly, sel_weekly = make_interval_btn(iv_frame, 'weekly', 'weekly')
+btn_weekly.pack(side="left", padx=(0, 8))
+refs['btn_weekly'] = btn_weekly
 
-# ── Time Range 选择 ───────────────────────────────────────
+btn_3day, sel_3day = make_interval_btn(iv_frame, '3day', '3day')
+btn_3day.pack(side="left")
+refs['btn_3day'] = btn_3day
+
+sel_weekly()   # 默认选 weekly
+
+# ── 时间段选择 ────────────────────────────────────────────
 refs['lbl_timerange'] = make_section('timerange')
 
-var_range  = tk.IntVar(value=2)
+var_range = tk.IntVar(value=2)
 range_btns = []
 
 def select_range(idx):
     var_range.set(idx)
     for i, b in enumerate(range_btns):
-        b.configure(bg=SEL_BG if i==idx else BG_CARD,
-                    fg=ACCENT2 if i==idx else FG)
+        b.configure(bg=SEL_BG if i == idx else BG_CARD,
+                    fg=ACCENT if i == idx else FG)
 
 for idx, (label, _, _) in enumerate(RANGES):
-    card = make_card()
-    btn = tk.Label(card, text=f"  {label}", font=FONT_OPTION,
+    btn = tk.Label(root, text=label, font=FONT_OPTION,
                    bg=BG_CARD, fg=FG, anchor="w", pady=9, cursor="hand2")
     btn.pack(fill="x", padx=8)
     btn.bind("<Button-1>", lambda e, i=idx: select_range(i))

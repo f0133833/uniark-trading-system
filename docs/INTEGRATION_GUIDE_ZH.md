@@ -33,7 +33,7 @@
 本指南守住自己的领地：**不重写 API、不重述方法论**，只回答两个问题：
 
 1. **集成视角**：从四文件骨架演化到完整背离系统，每一步都是可运行的中间态
-2. **演化视角**：以 `examples/divergence.py` 这个 381 行的初版作为讲解起点，完整走一遍"为什么后来加了 dedupe / provisional / 极值补检 / L1 屏障修正"
+2. **演化视角**：以 `examples/02-with-divergence/divergence.py` 这个 381 行的初版作为讲解起点，完整走一遍"为什么后来加了 dedupe / provisional / 极值补检 / L1 屏障修正"
 
 读完之后，应能做到：
 - 在自己的项目里看到带 ▲▼ 标注的 K 线图
@@ -65,9 +65,9 @@ GETTING_STARTED 终点                  本指南终点
 
 ## 1.1 拷贝 divergence.py 到项目目录
 
-从仓库的 `examples/` 目录拷一份 `divergence.py` 到项目目录（和现有 `data.py / indicator.py / plot.py / main.py` 放在一起）。
+从仓库的 `examples/02-with-divergence/` 目录拷一份 `divergence.py` 到项目目录（和现有 `data.py / indicator.py / plot.py / main.py` 放在一起）。
 
-> **为什么是 examples/ 下的初版而不是 code_zh/ 下的最终版？**
+> **为什么是 `examples/02-with-divergence/` 下的初版而不是 `code_zh/` 下的最终版？**
 > 简短回答：初版只有 381 行、结构清晰，是最好的学习版本；最终版加了四轮补丁，密度太高，新读者拆不开"主干"和"补丁"。完整理由见第 2 章。
 
 ## 1.2 修改 main.py 调用 divergence.py
@@ -143,8 +143,8 @@ for d in divs:
 
 ```
 uniark-trading-system/
-├── examples/divergence.py    ← 381 行，初版（学习用）
-└── code_zh/divergence.py     ← 500+ 行，最终版（生产用）
+├── examples/02-with-divergence/divergence.py    ← 381 行，初版（学习用）
+└── code_zh/divergence.py                        ← 500+ 行，最终版（生产用）
 ```
 
 两版的**核心几何**完全相同：分段、三段窗口、力度比、反向屏障。差别在最终版多了四组"上线后才发现要补"的逻辑：
@@ -678,7 +678,7 @@ def _filter_by_opposite_barriers(divs):
 
 ## 6.1 切换文件
 
-从仓库 `code_zh/` 目录拷贝 `divergence.py` 替换项目里 `examples/` 版的同名文件。
+从仓库 `code_zh/` 目录拷贝 `divergence.py` 替换项目里之前从 `examples/02-with-divergence/` 拷过来的同名文件。
 
 API 完全向后兼容——`find_three_segment_divergences(...)` 的调用方式不需要任何改动。新增的字段是**附加**的，老代码不读这些字段就跟以前一样工作。
 

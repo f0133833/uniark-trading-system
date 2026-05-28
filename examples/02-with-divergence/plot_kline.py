@@ -1,8 +1,8 @@
 """
 BTC K线绘图 - 多周期统一入口
 ==============================
-合并自 plot_single.py（周线）和 plot_3day.py（3日线）。
-所有"周期相关"的差异都收进 INTERVAL_CONFIG，绘图核心保持单一实现。
+把"周线"和"3日线"的差异收进 INTERVAL_CONFIG，绘图核心保持单一实现。
+未来要加日线、4 小时线，只在 INTERVAL_CONFIG 加一行即可。
 
 新增周期的三步：
   1. 在 data.py 加 get_<interval>_klines
@@ -24,7 +24,12 @@ import sys
 import os
 import matplotlib
 matplotlib.use('Agg')
-matplotlib.rcParams['font.sans-serif'] = ['Noto Sans CJK JP', 'WenQuanYi Zen Hei', 'DejaVu Sans']
+# 中文字体回退链：按 Linux 通用 / Linux 备用 / Windows / macOS 兜底 / 最终回退顺序尝试。
+# 系统装了哪个就用哪个，无效字体名会被自动跳过。
+matplotlib.rcParams['font.sans-serif'] = [
+    'WenQuanYi Micro Hei', 'Noto Sans CJK SC', 'SimHei',
+    'PingFang SC', 'DejaVu Sans',
+]
 matplotlib.rcParams['axes.unicode_minus'] = False
 
 from data import get_weekly_klines, get_3day_klines
@@ -141,6 +146,12 @@ def render_chart(interval, start_str=None, end_str=None):
     )
     fig.subplots_adjust(top=0.93)
 
+    # mplfinance 在 volume=True 的 3 面板布局下返回的 axes 顺序为：
+    #   [0] 主图 candles    [1] 主图孪生轴
+    #   [2] 成交量          [3] 成交量孪生轴
+    #   [4] MACD 面板       [5] MACD 孪生轴
+    # 我们要在 MACD 面板上标注 ▲▼，所以拿 axes[4]。
+    # 注：如果未来升级 mplfinance 改了 axes 顺序，这里要同步调整。
     macd_ax = axes[4] if len(axes) >= 5 else None
 
     divergences = find_three_segment_divergences(

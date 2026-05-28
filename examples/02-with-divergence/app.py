@@ -1,6 +1,6 @@
 """
 BTC K线分析 - Web App
-手机/电脑浏览器访问: http://<本机IP>:5000
+本机浏览器访问: http://127.0.0.1:5000
 
 绘图核心已抽到 plot_kline.render_chart，本文件只剩 Flask 壳 + 前端模板。
 """
@@ -61,32 +61,33 @@ HTML = """
                 transition: all 0.2s; user-select: none; }
     .lang-btn.active { background: #3a3a5e; color: #7c6af7; }
     .lang-divider { width: 1px; background: #44446a; }
-    h1 { font-size: 1.25rem; color: #7c6af7; margin-bottom: 20px;
-         text-align: center; }
-    .section-title { font-size: 0.82rem; color: #7c6af7; font-weight: bold;
+    h1 { color: #7c6af7; text-align: center; font-size: 1.4rem;
+         margin-bottom: 18px; }
+    .section-title { font-size: 0.78rem; color: #7c6af7; font-weight: bold;
                      text-transform: uppercase; letter-spacing: 1px;
-                     margin-bottom: 8px; }
-    .card-group { display: flex; gap: 8px; margin-bottom: 20px; }
-    .card { flex: 1; background: #2a2a3e; border: 1px solid #44446a;
-            border-radius: 8px; padding: 12px; text-align: center;
-            cursor: pointer; font-size: 1rem; transition: all 0.2s; }
-    .card:hover { border-color: #7c6af7; }
-    .card.active { background: #3a3a5e; color: #7c6af7;
-                   border-color: #7c6af7; font-weight: bold; }
-    .range-list { display: flex; flex-direction: column;
-                  gap: 8px; margin-bottom: 24px; }
-    .range-item { background: #2a2a3e; border: 1px solid #44446a;
-                  border-radius: 8px; padding: 13px 16px; cursor: pointer;
-                  font-size: 1rem; transition: all 0.2s; }
-    .range-item:hover { border-color: #f7a26a; }
-    .range-item.active { background: #3a3a5e; color: #f7a26a;
-                         border-color: #f7a26a; font-weight: bold; }
-    .btn { width: 100%; padding: 14px; background: #7c6af7; color: white;
-           border: none; border-radius: 8px; font-size: 1.05rem;
-           font-weight: bold; cursor: pointer; transition: background 0.2s;
-           margin-bottom: 14px; }
-    .btn:hover   { background: #9b8dff; }
-    .btn:disabled{ background: #44446a; cursor: not-allowed; }
+                     margin-bottom: 8px; margin-top: 14px; }
+    .card-group { display: flex; gap: 10px; margin-bottom: 4px; }
+    .card { flex: 1; padding: 12px; background: #2a2a3e;
+            border: 1px solid #44446a; border-radius: 8px;
+            text-align: center; cursor: pointer; transition: all 0.15s;
+            font-weight: bold; user-select: none; }
+    .card:hover  { border-color: #7c6af7; }
+    .card.active { background: #3a3a5e; border-color: #7c6af7;
+                   color: #7c6af7; }
+    .range-list { display: flex; flex-direction: column; gap: 6px;
+                  margin-bottom: 4px; }
+    .range-item { padding: 10px 14px; background: #2a2a3e;
+                  border: 1px solid #44446a; border-radius: 6px;
+                  cursor: pointer; transition: all 0.15s; user-select: none; }
+    .range-item:hover  { border-color: #7c6af7; }
+    .range-item.active { background: #3a3a5e; border-color: #7c6af7;
+                         color: #7c6af7; }
+    .btn { width: 100%; padding: 12px; background: #7c6af7;
+           color: #fff; border: none; border-radius: 8px;
+           font-size: 0.95rem; font-weight: bold; cursor: pointer;
+           transition: background 0.15s; margin-top: 14px; }
+    .btn:hover    { background: #9b8dff; }
+    .btn:disabled { background: #44446a; cursor: not-allowed; }
     #status { text-align: center; font-size: 0.88rem; color: #8888aa;
               margin-bottom: 14px; min-height: 1.2em; }
     #status.ok  { color: #50fa7b; }
@@ -247,6 +248,12 @@ def generate():
 
 
 if __name__ == '__main__':
-    print("启动服务: http://0.0.0.0:5000")
-    print("手机访问: http://<本机IP>:5000")
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    # 安全默认：只在本机回环地址监听。
+    # 浏览器访问 http://127.0.0.1:5000 即可。
+    #
+    # 如需手机/同 WiFi 设备访问，把 host 改为 '0.0.0.0'，然后用本机 IP 访问。
+    # ⚠️ 注意：'0.0.0.0' 会把服务暴露到当前局域网，公共 WiFi 下慎用。
+    HOST = '127.0.0.1'
+    PORT = 5000
+    print(f"启动服务: http://{HOST}:{PORT}")
+    app.run(host=HOST, port=PORT, debug=False)
