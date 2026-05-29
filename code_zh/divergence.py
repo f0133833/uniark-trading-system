@@ -577,8 +577,12 @@ def find_three_segment_divergences(hist_series, low_series, high_series,
 # hist 在零轴附近的微小抖动会切出 1-3 根的短段，相邻短段之间在趋势中
 # 几乎必然满足"后段越过前段"条件（因为趋势本身在创新极值），形成噪声
 # 刷屏。前后两段任一长度小于此阈值则跳过该对。
-# 4 根是周线/日线场景下较稳妥的起点，按需要可上调。
-MISSED_EXTREME_MIN_BARS = 4
+#
+# 早期经验值 4 根在持续单边走势中会被频繁过零的短段刷屏。
+# 实测 10 根在周/日/小时多数主流周期上噪声显著减少——
+# 如需进一步调整，改这一行即可。仅影响 find_missed_extremes；
+# 标准三段背离的 min_bars 参数独立控制。
+MISSED_EXTREME_MIN_BARS = 10
 
 
 def find_missed_extremes(hist_series, low_series, high_series,
