@@ -34,8 +34,8 @@ matplotlib.rcParams['axes.unicode_minus'] = False
 
 from data import get_klines
 from indicator import add_indicators
-from divergence import find_three_segment_divergences
-from plot_helpers import annotate_divergences, print_divergences
+from divergence import find_three_segment_divergences, find_missed_extremes
+from plot_helpers import annotate_divergences, print_divergences, annotate_extremes
 from navigation import INTERVAL_MINUTES
 import mplfinance as mpf
 import matplotlib.pyplot as plt
@@ -195,6 +195,13 @@ def render_chart(symbol, interval, start_str=None, end_str=None):
     )
     if macd_ax is not None:
         annotate_divergences(macd_ax, df, divergences)
+
+    # ─── 极值补检(独立路径,不污染 divergences 列表)──────────────────
+    # 处理"价格创新极值但落在反向 hist 段"的场景,标准三段背离漏掉。
+    # 视觉用空心三角 △▽(区别于实心 ▲▼),锚在价格主面板 axes[0]。
+    extremes = find_missed_extremes(df['hist'], df['low'], df['high'])
+    if len(axes) >= 1:
+        annotate_extremes(axes[0], df, extremes)
 
     return fig, df, divergences
 

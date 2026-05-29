@@ -219,3 +219,95 @@ def print_divergences(df, divergences):
             f"S3={div['s3_area']:.0f}({div['s3_bars']}b)"
             f"{prov_tag}{l1_tag}"
         )
+
+
+
+# =============================================================================
+# 极值补检的视觉标注（独立于标准三段背离的标注通道）
+# =============================================================================
+# 视觉编码
+# --------
+#   底背离极值：空心红色 △（朝上，画在 K 线最低价下方）
+#   顶背离极值：空心绿色 ▽（朝下，画在 K 线最高价上方）
+#
+# 颜色复用顶部已定义的 COLOR_BULLISH / COLOR_BEARISH 常量。
+#
+# 为什么用空心三角而不是实心
+# --------------------------
+# 与 annotate_divergences 的实心 ▲▼ 形成视觉对比：实心 = 标准三段背离
+# （结构清晰），空心 = 极值补检（标准检测漏掉的）。读者一眼能区分两
+# 类信号，不需要看任何文字标签。
+#
+# 锚点选择：K 线极值
+# ------------------
+# annotate_divergences 锚定在 hist 极值柱旁（MACD 面板），本函数锚定
+# 在 K 线的真实价格极值旁（主价格面板）——这正是本类信号的语义本质：
+# "价格创了新极值，但发生在反向 hist 段上"。锚定在价格极值才能让标注
+# 落在视觉上"该在的位置"。
+
+def annotate_extremes(price_ax, df, extremes, marker_size=80):
+    """
+    在主价格面板上标注极值补检结果。
+
+    Parameters
+    ----------
+    price_ax     : matplotlib Axes   K 线主面板（不是 MACD 面板）
+    df           : pd.DataFrame      含 low / high 列的数据
+    extremes     : list[dict]        find_missed_extremes 的返回
+    marker_size  : int               散点尺寸（默认 80，与 MARKER_SIZE 一致）
+
+    Notes
+    -----
+    本函数标注在主价格面板（panel=0），而非 MACD 面板。这是它和
+    annotate_divergences 的关键区别——后者标在 MACD 面板上锚定 hist 极值，
+    本函数标在价格面板上锚定真实价格极值。
+
+    使用 facecolors='none' 让三角变空心，与 annotate_divergences 的
+    实心三角形成对比。
+    """
+    if not extremes:
+        return
+
+    y_min, y_max = price_ax.get_ylim()
+    y_range = y_max - y_min
+    off = y_range * 0.02   # 标记距 K 线极值的偏移（价格面板高度 2%）
+
+    marker_ys = []   # 记录所有标记位置，用于必要时外扩 ylim
+
+    for ext in extremes:
+        peak_idx = ext['peak_idx']
+        if peak_idx < 0 or peak_idx >= len(df):
+            continue
+
+        if ext['kind'] == 'bullish':
+            # 底极值：标在 K 线最低价下方，朝上的空心三角
+            y_anchor = df['low'].iloc[peak_idx]
+            y_marker = y_anchor - off
+            marker_style = '^'
+            color = COLOR_BULLISH
+        else:
+            # 顶极值：标在 K 线最高价上方，朝下的空心三角
+            y_anchor = df['high'].iloc[peak_idx]
+            y_marker = y_anchor + off
+            marker_style = 'v'
+            color = COLOR_BEARISH
+
+        # 关键：facecolors='none' 让三角变空心，edgecolors 保留轮廓
+        price_ax.scatter(
+            [peak_idx], [y_marker],
+            marker=marker_style, s=marker_size,
+            facecolors='none', edgecolors=color,
+            linewidths=1.5, zorder=5,
+        )
+        marker_ys.append(y_marker)
+
+    # ylim 自动外扩：若标记越界则扩，加 2% padding
+    if marker_ys:
+        pad = y_range * 0.02
+        needed_min = min(marker_ys)
+        needed_max = max(marker_ys)
+        new_min = min(y_min, needed_min - pad)
+        new_max = max(y_max, needed_max + pad)
+        if new_min < y_min or new_max > y_max:
+            price_ax.set_ylim(new_min, new_max)
+

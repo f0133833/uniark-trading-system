@@ -537,3 +537,114 @@ def find_three_segment_divergences(hist_series, low_series, high_series,
 
     out.sort(key=lambda d: (d['s3_start'], d['level']))
     return out
+
+
+
+# =============================================================================
+# 极值补检（独立路径，不与标准三段背离交叉）
+# =============================================================================
+# 动机
+# ----
+# MACD 是动量指标——动量拐点先于价格拐点。具体表现：价格的真实顶/底
+# 常常落在 hist 已经翻号之后的若干根 K 线上。这种极值落在"反向颜色"
+# 的 hist 段里，凑不出标准三段背离要求的"绿-红-绿"或"红-绿-红"结构，
+# find_three_segment_divergences 完全检测不到。
+#
+# 设计原则：完全独立
+# ------------------
+# 本函数返回的是"另一种"信号，记录字段结构与 find_three_segment_divergences
+# 完全不同，不会被混淆进同一个列表。调用方拿到两个独立列表，分别走
+# 两条独立的可视化通道。这样做的好处：
+# 1. 标准三段背离的算法（屏障 / 去重 / provisional）一行不改
+# 2. 即使本函数完全失效，也不会破坏已有的 L1 / L2 信号
+# 3. 视觉上用空心三角 △▽（区别于标准背离的实心 ▲▼），读者一眼能区分
+#
+# 几何判据：相邻反向段比较
+# ------------------------
+# 顶：绿段 G 紧跟红段 R。若 R 段最高价 > G 段最高价 —— 真实价格高点
+#     落在了红段 R 里 —— 则该高点是被标准三段背离漏掉的顶极值。
+# 底：红段 R 紧跟绿段 G。若 G 段最低价 < R 段最低价 —— 真实价格低点
+#     落在了绿段 G 里 —— 则该低点是被标准三段背离漏掉的底极值。
+#
+# 为什么是相邻段比较而非全程 running-max/min
+# -------------------------------------------
+# 全程比较会被"窗口起点本身是个深底"等情况误伤——后续真正的局部大底
+# 永远跨不过窗口起点而被漏标。相邻段比较只问"价格有没有越过动量转向
+# 前那一段的极值"，与窗口起点无关，且天然自限：盘整中继里的普通反向
+# 段凑不出"越过前段极值"的条件，不会刷屏。
+
+# 短反向段过滤阈值。
+# hist 在零轴附近的微小抖动会切出 1-3 根的短段，相邻短段之间在趋势中
+# 几乎必然满足"后段越过前段"条件（因为趋势本身在创新极值），形成噪声
+# 刷屏。前后两段任一长度小于此阈值则跳过该对。
+# 4 根是周线/日线场景下较稳妥的起点，按需要可上调。
+MISSED_EXTREME_MIN_BARS = 4
+
+
+def find_missed_extremes(hist_series, low_series, high_series,
+                         min_bars=MISSED_EXTREME_MIN_BARS):
+    """
+    补检"价格极值落在反向 hist 段"的背离。
+
+    与 find_three_segment_divergences 是完全独立的两条路径，结果不交叉、
+    不去重。调用方拿到的是另一种类型的信号记录。
+
+    Parameters
+    ----------
+    hist_series : pd.Series   MACD 柱状图
+    low_series  : pd.Series   K 线最低价
+    high_series : pd.Series   K 线最高价
+    min_bars    : int         相邻反向段对的过短过滤阈值（默认 4）
+
+    Returns
+    -------
+    list[dict]，每条记录字段（与三段背离的记录字段不同，刻意保持精简）：
+        kind      : 'bullish' | 'bearish'
+        peak_idx  : int    极值 K 线下标（用于标注定位）
+        prev_end  : int    前段（反向颜色）末尾下标
+        curr_start: int    当前段（承载极值）起始下标
+        curr_end  : int    当前段末尾下标
+    """
+    segs = find_hist_segments(hist_series)
+    results = []
+
+    for i in range(1, len(segs)):
+        prev = segs[i - 1]
+        curr = segs[i]
+
+        # 过短过滤
+        if prev['bars'] < min_bars or curr['bars'] < min_bars:
+            continue
+
+        # 顶背离极值：绿段 G(=pos) 紧跟红段 R(=neg)，R 内最高价 > G 内最高价
+        if prev['sign'] == 'pos' and curr['sign'] == 'neg':
+            prev_high = high_series.iloc[prev['start']:prev['end'] + 1].max()
+            curr_window = high_series.iloc[curr['start']:curr['end'] + 1]
+            curr_high = curr_window.max()
+            if curr_high > prev_high:
+                peak_idx = curr['start'] + int(curr_window.values.argmax())
+                results.append({
+                    'kind':       'bearish',
+                    'peak_idx':   peak_idx,
+                    'prev_end':   prev['end'],
+                    'curr_start': curr['start'],
+                    'curr_end':   curr['end'],
+                })
+
+        # 底背离极值：红段 R(=neg) 紧跟绿段 G(=pos)，G 内最低价 < R 内最低价
+        elif prev['sign'] == 'neg' and curr['sign'] == 'pos':
+            prev_low = low_series.iloc[prev['start']:prev['end'] + 1].min()
+            curr_window = low_series.iloc[curr['start']:curr['end'] + 1]
+            curr_low = curr_window.min()
+            if curr_low < prev_low:
+                peak_idx = curr['start'] + int(curr_window.values.argmin())
+                results.append({
+                    'kind':       'bullish',
+                    'peak_idx':   peak_idx,
+                    'prev_end':   prev['end'],
+                    'curr_start': curr['start'],
+                    'curr_end':   curr['end'],
+                })
+
+    return results
+
