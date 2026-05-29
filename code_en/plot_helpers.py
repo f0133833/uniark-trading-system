@@ -259,3 +259,106 @@ def print_divergences(df, divergences):
             f"S3={div['s3_area']:.0f}({div['s3_bars']}b)"
             f"{prov_tag}{l1_tag}"
         )
+
+
+# =============================================================================
+# Visual annotation for missed-extreme detection
+# (independent from the standard three-segment divergence channel)
+# =============================================================================
+# Visual encoding
+# ---------------
+#   Bottom-extreme (bullish): hollow red △ (pointing up, drawn below the
+#                             K-line low)
+#   Top-extreme    (bearish): hollow green ▽ (pointing down, drawn above
+#                             the K-line high)
+#
+# Colors reuse COLOR_BULLISH / COLOR_BEARISH defined at the top of the
+# file.
+#
+# Why hollow triangles instead of solid
+# -------------------------------------
+# Contrasts with the solid ▲▼ used by annotate_divergences: solid =
+# standard three-segment divergence (clear structure); hollow = missed-
+# extreme supplement (what the standard detection missed). The reader
+# distinguishes the two categories instantly with no need for any text
+# label.
+#
+# Anchor choice: K-line extreme
+# -----------------------------
+# annotate_divergences is anchored next to the hist extremum bar (MACD
+# panel); this function is anchored next to the actual K-line price
+# extreme (main price panel) — which is precisely the semantic essence
+# of this signal type: "price made a new extreme, but it happened
+# inside an opposite-color hist segment". Anchoring at the price
+# extreme places the annotation where it visually belongs.
+
+def annotate_extremes(price_ax, df, extremes, marker_size=80):
+    """
+    Annotate missed-extreme detections on the main price panel.
+
+    Parameters
+    ----------
+    price_ax     : matplotlib Axes   The K-line main panel
+                                     (not the MACD panel).
+    df           : pd.DataFrame      Must contain low / high columns.
+    extremes     : list[dict]        Return value of find_missed_extremes.
+    marker_size  : int               Scatter size (default 80, matches
+                                     MARKER_SIZE).
+
+    Notes
+    -----
+    This function annotates on the main price panel (panel=0), not the
+    MACD panel. That's the key difference from annotate_divergences:
+    the latter annotates on the MACD panel anchored to the hist
+    extremum; this one annotates on the price panel anchored to the
+    actual K-line price extreme.
+
+    facecolors='none' makes the triangles hollow, contrasting with the
+    solid triangles used by annotate_divergences.
+    """
+    if not extremes:
+        return
+
+    y_min, y_max = price_ax.get_ylim()
+    y_range = y_max - y_min
+    off = y_range * 0.02   # offset from K-line extreme (2% of panel height)
+
+    marker_ys = []   # track marker positions; extend ylim later if needed
+
+    for ext in extremes:
+        peak_idx = ext['peak_idx']
+        if peak_idx < 0 or peak_idx >= len(df):
+            continue
+
+        if ext['kind'] == 'bullish':
+            # Bottom extreme: below the K-line low, upward hollow triangle
+            y_anchor = df['low'].iloc[peak_idx]
+            y_marker = y_anchor - off
+            marker_style = '^'
+            color = COLOR_BULLISH
+        else:
+            # Top extreme: above the K-line high, downward hollow triangle
+            y_anchor = df['high'].iloc[peak_idx]
+            y_marker = y_anchor + off
+            marker_style = 'v'
+            color = COLOR_BEARISH
+
+        # Key: facecolors='none' produces a hollow triangle; edgecolors
+        # keeps the outline.
+        price_ax.scatter(
+            [peak_idx], [y_marker],
+            marker=marker_style, s=marker_size,
+            facecolors='none', edgecolors=color,
+            linewidths=1.5, zorder=5,
+        )
+        marker_ys.append(y_marker)
+
+    # Auto-extend ylim if markers overflow, with 2% padding
+    if marker_ys:
+        pad = y_range * 0.02
+        needed_min = min(marker_ys)
+        needed_max = max(marker_ys)
+        new_min = min(y_min, needed_min - pad)
+        new_max = max(y_max, needed_max + pad)
+        if new_min < y_min or new_max > y_max:
+            price_ax.set_ylim(new_min, new_max)

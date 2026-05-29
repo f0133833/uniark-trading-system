@@ -41,8 +41,8 @@ matplotlib.rcParams['axes.unicode_minus'] = False
 
 from data import get_klines
 from indicator import add_indicators
-from divergence import find_three_segment_divergences
-from plot_helpers import annotate_divergences, print_divergences
+from divergence import find_three_segment_divergences, find_missed_extremes
+from plot_helpers import annotate_divergences, print_divergences, annotate_extremes
 from navigation import INTERVAL_MINUTES
 import mplfinance as mpf
 import matplotlib.pyplot as plt
@@ -212,6 +212,16 @@ def render_chart(symbol, interval, start_str=None, end_str=None):
     )
     if macd_ax is not None:
         annotate_divergences(macd_ax, df, divergences)
+
+    # ─── Missed-extreme detection (independent path; does not pollute
+    # the divergences list) ─────────────────────────────────────────
+    # Handles the "price made a new extreme but landed on an opposite-
+    # color hist segment" case, which the standard three-segment
+    # divergence misses. Visual: hollow triangles △▽ (vs. solid ▲▼),
+    # anchored on the main price panel axes[0].
+    extremes = find_missed_extremes(df['hist'], df['low'], df['high'])
+    if len(axes) >= 1:
+        annotate_extremes(axes[0], df, extremes)
 
     return fig, df, divergences
 

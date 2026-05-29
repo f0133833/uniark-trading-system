@@ -646,3 +646,140 @@ def find_three_segment_divergences(hist_series, low_series, high_series,
 
     out.sort(key=lambda d: (d['s3_start'], d['level']))
     return out
+
+
+# =============================================================================
+# Missed-extreme detection (independent path, no crossover with the standard
+# three-segment divergence)
+# =============================================================================
+# Motivation
+# ----------
+# MACD is a momentum indicator — its turning points lead price turning points.
+# A common consequence: the actual price top/bottom often lands several bars
+# AFTER hist has already flipped sign. Such an extreme sits inside the
+# "opposite-color" hist segment, cannot be assembled into the
+# "green-red-green" or "red-green-red" pattern required by the standard
+# three-segment divergence, and is completely missed by
+# find_three_segment_divergences.
+#
+# Design principle: fully independent
+# -----------------------------------
+# This function returns a DIFFERENT type of signal. Its record fields do
+# not match those returned by find_three_segment_divergences and will not
+# be mixed into the same list. Callers receive two independent lists and
+# can route them through two independent visualization channels. Benefits:
+# 1. The standard three-segment algorithm (barrier / dedupe / provisional)
+#    is not touched at all.
+# 2. Even if this function fails completely, existing L1 / L2 signals are
+#    not affected.
+# 3. Visually, hollow triangles △▽ (vs. the solid ▲▼ used for standard
+#    divergence) let readers tell the two kinds apart at a glance.
+#
+# Geometric criterion: adjacent opposite-segment comparison
+# ---------------------------------------------------------
+# Top: a green segment G immediately followed by a red segment R. If R's
+#      highest price > G's highest price — the actual price peak sits
+#      inside R — then this peak is a top-extreme missed by the standard
+#      three-segment divergence.
+# Bottom: a red segment R immediately followed by a green segment G. If G's
+#         lowest price < R's lowest price — the actual price trough sits
+#         inside G — then this trough is a bottom-extreme missed by the
+#         standard three-segment divergence.
+#
+# Why adjacent-segment comparison rather than a running max/min
+# -------------------------------------------------------------
+# A running max/min over the whole window would be biased by cases where
+# the window start itself is a deep extreme — a later genuine local
+# extreme can never beat the window start and gets silently dropped.
+# Adjacent-segment comparison asks only "did price exceed the extreme of
+# the segment immediately before this momentum flip", which is independent
+# of the window start. It's also self-limiting: ordinary opposite segments
+# inside a consolidation cannot satisfy "the latter exceeds the former",
+# so this does not spam.
+
+# Threshold for filtering short opposite segments.
+# Tiny wiggles of hist near the zero axis carve out 1-3 bar segments;
+# between such short segments, the "latter exceeds former" condition is
+# almost always satisfied during a trend (because the trend itself is
+# making new extremes), producing noise spam. If either of the two
+# adjacent segments is shorter than this threshold, skip the pair.
+# 4 bars is a conservative starting point for weekly / daily; tune up
+# if needed.
+MISSED_EXTREME_MIN_BARS = 4
+
+
+def find_missed_extremes(hist_series, low_series, high_series,
+                         min_bars=MISSED_EXTREME_MIN_BARS):
+    """
+    Supplementary detection of "price extremes that land in opposite-color
+    hist segments".
+
+    Fully independent from find_three_segment_divergences — the two paths
+    do not cross or deduplicate against each other. The caller receives
+    a different type of signal record.
+
+    Parameters
+    ----------
+    hist_series : pd.Series   MACD histogram
+    low_series  : pd.Series   K-line low prices
+    high_series : pd.Series   K-line high prices
+    min_bars    : int         minimum bar count for both segments in a
+                              pair to be considered (default 4)
+
+    Returns
+    -------
+    list[dict], each record (fields intentionally minimal, different
+    from those returned by find_three_segment_divergences):
+        kind      : 'bullish' | 'bearish'
+        peak_idx  : int    index of the K-line carrying the extreme
+                           (used for annotation placement)
+        prev_end  : int    end index of the previous (opposite-color)
+                           segment
+        curr_start: int    start index of the current segment (the one
+                           that carries the extreme)
+        curr_end  : int    end index of the current segment
+    """
+    segs = find_hist_segments(hist_series)
+    results = []
+
+    for i in range(1, len(segs)):
+        prev = segs[i - 1]
+        curr = segs[i]
+
+        # Short-segment filter
+        if prev['bars'] < min_bars or curr['bars'] < min_bars:
+            continue
+
+        # Top extreme: green G (=pos) immediately followed by red R (=neg);
+        # R's highest > G's highest.
+        if prev['sign'] == 'pos' and curr['sign'] == 'neg':
+            prev_high = high_series.iloc[prev['start']:prev['end'] + 1].max()
+            curr_window = high_series.iloc[curr['start']:curr['end'] + 1]
+            curr_high = curr_window.max()
+            if curr_high > prev_high:
+                peak_idx = curr['start'] + int(curr_window.values.argmax())
+                results.append({
+                    'kind':       'bearish',
+                    'peak_idx':   peak_idx,
+                    'prev_end':   prev['end'],
+                    'curr_start': curr['start'],
+                    'curr_end':   curr['end'],
+                })
+
+        # Bottom extreme: red R (=neg) immediately followed by green G (=pos);
+        # G's lowest < R's lowest.
+        elif prev['sign'] == 'neg' and curr['sign'] == 'pos':
+            prev_low = low_series.iloc[prev['start']:prev['end'] + 1].min()
+            curr_window = low_series.iloc[curr['start']:curr['end'] + 1]
+            curr_low = curr_window.min()
+            if curr_low < prev_low:
+                peak_idx = curr['start'] + int(curr_window.values.argmin())
+                results.append({
+                    'kind':       'bullish',
+                    'peak_idx':   peak_idx,
+                    'prev_end':   prev['end'],
+                    'curr_start': curr['start'],
+                    'curr_end':   curr['end'],
+                })
+
+    return results
