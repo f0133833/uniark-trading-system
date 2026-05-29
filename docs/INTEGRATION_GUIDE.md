@@ -565,19 +565,24 @@ Consequence: a portion of real extreme divergences gets missed. How much depends
 
 ### The Final Version's Patch: `find_missed_extremes`
 
-The final version adds an independent recheck function for "price extremes that appear after hist flips sign." How it works (simplified):
+The final version adds an independent recheck function `find_missed_extremes` that handles this miss. How it works:
 
-- Scan each same-direction hist segment
-- Check the few opposite-direction hist bars on either side of the segment for prices "more extreme than the segment's own"
-- If found, generate a `level=0` "extreme divergence" record (using level=0 to distinguish from standard three-segment divergences)
+- Scan adjacent pairs of opposite-color hist segments (green-then-red, or red-then-green)
+- Top-extreme rule: red segment R's highest price > preceding green segment G's highest price → the bar inside R is a missed top
+- Bottom-extreme rule: green segment G's lowest price < preceding red segment R's lowest price → the bar inside G is a missed bottom
+- Short-segment filter: skip a pair if either segment is shorter than `MISSED_EXTREME_MIN_BARS` (default 10, to avoid noise spam from hist's frequent zero-crossings)
 
-The final version's entry function calls both `find_three_segment_divergences` and `find_missed_extremes` and merges the results.
+`find_missed_extremes` returns records with a record shape **completely different from** `find_three_segment_divergences` — only five fields (`kind`, `peak_idx`, `prev_end`, `curr_start`, `curr_end`), no `level`, no `ratio`, no `s1_area`. This is deliberate:
 
-### Do You Need to Patch?
+- Not merged into the same list → standard three-segment dedupe / barrier / provisional logic stays untouched
+- Not part of the drill-down pipeline → the extreme is just an annotation anchor, no "segment span" semantics needed
+- Visually rendered as **hollow △▽** (vs. the solid ▲▼ used for standard divergence) — readers tell the two signal types apart at a glance
 
-**If your trading system depends on "never missing a real top/bottom," must patch.** In that case, switch directly to the final version — don't roll your own. This patch has many edge cases ("how far to scan on either side," "what price threshold") and rolling your own usually makes it worse.
+The whole integration adds 5 lines: `plot_kline.py` calls `annotate_extremes(axes[0], df, extremes)` after `annotate_divergences`, drawing the hollow triangles on the main price panel (not the MACD panel).
 
-If you can accept "standard three-segment divergence misses some extremes, but those it does catch are structurally clear" — no patch needed, the early version is fine.
+### About the Noise Threshold
+
+`MISSED_EXTREME_MIN_BARS=10` is not an axiom — it's an engineering parameter. The initial value was 4, but in sustained trending moves (e.g. BTC weekly throughout 2018's downtrend) hist crosses the zero axis repeatedly, producing a flood of "fake missed extremes." Empirically, 10 bars cuts the noise substantially across weekly / daily / hourly intervals on mainstream symbols. Tune it down for calmer markets, up for noisier ones.
 
 ## 5.4 Pitfall 4: The L1 Barrier Bug (Logic Error)
 
@@ -687,6 +692,7 @@ Open the final version's docstring. You'll find:
 - "Triggering an opposite divergence = the start of the next same-direction structure" axiomatic phrasing — you've sketched this in 3.4, instant understanding
 - "Barrier strength judged by 'maximum level at the same terminal position'" — the minimal patch in 5.4 uses exactly this, instant understanding
 - The `same_terminal_l1` field description — you saw the double-annotation phenomenon in 5.1, instant understanding
+- "Missed-extreme detection runs as an independent path, rendered with hollow △▽" — you saw the phenomenon in 5.3, instant understanding
 
 The final version's docstring is no longer "the author talking to themselves" — it's now **an engineering log you can fully follow**.
 
