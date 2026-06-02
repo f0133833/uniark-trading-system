@@ -94,8 +94,8 @@ the following hold:
 1. **Trigger.** A segment leaves the existing consolidation range.
 2. **Completion.** That segment participates in the construction of a
    new three-segment structure.
-3. **Confirmation.** The new consolidation range is disjoint from the
-   old one.
+3. **Confirmation.** The new three-segment structure is disjoint from
+   the old consolidation range.
 
 **Direction of transition:**
 
