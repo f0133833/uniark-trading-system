@@ -598,7 +598,7 @@ def find_missed_extremes(hist_series, low_series, high_series,
     hist_series : pd.Series   MACD 柱状图
     low_series  : pd.Series   K 线最低价
     high_series : pd.Series   K 线最高价
-    min_bars    : int         相邻反向段对的过短过滤阈值（默认 4）
+    min_bars    : int         相邻反向段对的过短过滤阈值（默认 5）
 
     Returns
     -------

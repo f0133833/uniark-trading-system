@@ -729,7 +729,7 @@ def find_missed_extremes(hist_series, low_series, high_series,
     low_series  : pd.Series   K-line low prices
     high_series : pd.Series   K-line high prices
     min_bars    : int         minimum bar count for both segments in a
-                              pair to be considered (default 4)
+                              pair to be considered (default 5)
 
     Returns
     -------
