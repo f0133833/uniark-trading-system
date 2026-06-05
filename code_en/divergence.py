@@ -704,13 +704,13 @@ def find_three_segment_divergences(hist_series, low_series, high_series,
 # making new extremes), producing noise spam. If either of the two
 # adjacent segments is shorter than this threshold, skip the pair.
 #
-# The early value of 4 was overwhelmed by frequent zero-crossings in
-# sustained trending moves. Empirically, 10 bars cuts the noise
+# The early value of 5 was overwhelmed by frequent zero-crossings in
+# sustained trending moves. Empirically, 9 bars cuts the noise
 # substantially across weekly / daily / hourly intervals on mainstream
 # symbols — tune this single line if further adjustment is needed.
 # Only affects find_missed_extremes; the standard three-segment
 # divergence's min_bars parameter is controlled independently.
-MISSED_EXTREME_MIN_BARS = 10
+MISSED_EXTREME_MIN_BARS = 9
 
 
 def find_missed_extremes(hist_series, low_series, high_series,
