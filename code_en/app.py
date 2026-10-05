@@ -1017,5 +1017,5 @@ if __name__ == '__main__':
     parser.add_argument('--host', default='0.0.0.0')
     args = parser.parse_args()
     print(f"Starting server: http://{args.host}:{args.port}")
-    print(f"Mobile access: http://<本机IP>:{args.port}")
+    print(f"Mobile access: http://<your-LAN-IP>:{args.port}")
     app.run(host=args.host, port=args.port, debug=False)
