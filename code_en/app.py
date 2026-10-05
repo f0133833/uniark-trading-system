@@ -1010,8 +1010,12 @@ def post_settings():
 
     return jsonify({'ok': True, 'settings': new_settings})
 
-
 if __name__ == '__main__':
-    print("Starting server: http://0.0.0.0:5000")
-    print("Mobile access:   http://<your-LAN-IP>:5000")
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--port', type=int, default=5000)
+    parser.add_argument('--host', default='0.0.0.0')
+    args = parser.parse_args()
+    print(f"Starting server: http://{args.host}:{args.port}")
+    print(f"Mobile access: http://<本机IP>:{args.port}")
+    app.run(host=args.host, port=args.port, debug=False)
