@@ -35,6 +35,10 @@ from settings import ENTRY_INTERVALS
 
 app = Flask(__name__)
 
+# ── 界面开关 ─────────────────────────────────────────────────────────
+#SHOW_SETTINGS_BTN = True   # False = 隐藏顶栏 ⚙ 设置按钮
+SHOW_SETTINGS_BTN = False   # False = 隐藏顶栏 ⚙ 设置按钮
+
 
 def generate_chart(symbol, interval, start_str, end_str):
     """渲染并返回 (b64, actual_start_iso, actual_end_iso, bars_count)"""
@@ -212,8 +216,10 @@ HTML = r"""
   <div class="top-bar">
     <h1 id="title">📈 K-Line Generator</h1>
     <div class="top-right">
+      {% if show_settings_btn %}
       <div class="settings-btn" id="btn-settings"
            title="Settings" onclick="openSettings()">⚙</div>
+      {% endif %}
       <div class="lang-switcher">
         <div class="lang-btn active" id="btn-en" onclick="switchLang('en', true)">EN</div>
         <div class="lang-divider"></div>
@@ -902,6 +908,7 @@ def index():
         next_interval_json    = json.dumps(NEXT_INTERVAL),
         interval_minutes_json = json.dumps(INTERVAL_MINUTES),
         target_json           = json.dumps(BARS_PER_SEGMENT_TARGET),
+        show_settings_btn     = SHOW_SETTINGS_BTN,
     )
 
 
