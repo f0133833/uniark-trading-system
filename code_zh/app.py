@@ -36,9 +36,7 @@ from settings import ENTRY_INTERVALS
 app = Flask(__name__)
 
 # ── 界面开关 ─────────────────────────────────────────────────────────
-#SHOW_SETTINGS_BTN = True   # False = 隐藏顶栏 ⚙ 设置按钮
-SHOW_SETTINGS_BTN = False   # False = 隐藏顶栏 ⚙ 设置按钮
-
+SHOW_SETTINGS_BTN = True   # False = 隐藏顶栏 ⚙ 设置按钮
 
 def generate_chart(symbol, interval, start_str, end_str):
     """渲染并返回 (b64, actual_start_iso, actual_end_iso, bars_count)"""
