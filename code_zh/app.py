@@ -18,6 +18,7 @@ import sys
 import io
 import base64
 import json
+import pandas as pd   # 新增
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -47,11 +48,15 @@ def generate_chart(symbol, interval, start_str, end_str):
     plt.close(fig)
     buf.seek(0)
     img_b64 = base64.b64encode(buf.read()).decode('utf-8')
+    
+    # 右端 = 末根 K 线收盘前 1 秒，钻取时覆盖末根内部的全部子 K 线
+    last_close = (df.index[-1]
+                  + pd.Timedelta(minutes=INTERVAL_MINUTES[interval])
+                  - pd.Timedelta(seconds=1))
     return (img_b64,
             df.index[0].isoformat(),
-            df.index[-1].isoformat(),
+            last_close.isoformat(),
             int(len(df)))
-
 
 HTML = r"""
 <!DOCTYPE html>
