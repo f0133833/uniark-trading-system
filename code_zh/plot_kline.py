@@ -18,7 +18,7 @@ CLI 输出（供 main.py 解析）：
   根据请求的 [start_str, end_str] 计算实际拉取窗口：
       fetch_start = start_str - LOOKBACK_BARS × interval_duration
       fetch_end   = end_str （None 时拉到当下）
-  LOOKBACK_BARS=200 让 MA99 在 start_str 处已稳定（99×2+ 缓冲），
+      LOOKBACK_BARS = max(MA_PERIODS) + 50，保证最长均线在 start_str 处已有值
   对 MACD 同样足够（5×slow ≈ 130 根即趋同）。
 
   在主界面 settings 默认时段范围内（weekly 3 年 / 3day 1 年 / daily 4 月），
@@ -87,14 +87,13 @@ INTERVAL_CONFIG = {
     'weekly': {'label': 'Weekly', 'file_prefix': 'weekly', 'cn_name': '周线',   'min_bars': 0, 'max_level': None},
 }
 
-
-MA_PERIODS = (7, 25, 99)
-MA_COLORS  = ('#ff9900', '#cc44ff', '#00aaff')
+MA_PERIODS = (7, 25, 99, 200)
+MA_COLORS  = ('#ff9900', '#cc44ff', '#00aaff', '#333333')
+MA_WIDTHS  = (1.2, 1.2, 1.5, 1.8)
 
 TOO_MUCH_DATA_THRESHOLD = 600
-LOOKBACK_BARS = 200
+LOOKBACK_BARS = max(MA_PERIODS) + 50   # 原 200
 DATA_FLOOR = pd.Timestamp('2017-07-01')
-
 
 def calc_ma(series, period):
     return series.rolling(window=period).mean()
@@ -163,14 +162,16 @@ def render_chart(symbol, interval, start_str=None, end_str=None):
 
     macd_colors = get_macd_colors(df['hist'])
     apds = [
-        mpf.make_addplot(df[f'ma{MA_PERIODS[0]}'], panel=0, color=MA_COLORS[0], width=1.2, label=f'MA{MA_PERIODS[0]}'),
-        mpf.make_addplot(df[f'ma{MA_PERIODS[1]}'], panel=0, color=MA_COLORS[1], width=1.2, label=f'MA{MA_PERIODS[1]}'),
-        mpf.make_addplot(df[f'ma{MA_PERIODS[2]}'], panel=0, color=MA_COLORS[2], width=1.5, label=f'MA{MA_PERIODS[2]}'),
-        mpf.make_addplot(df['macd'],   panel=2, color='#1f77b4', label='MACD'),
-        mpf.make_addplot(df['signal'], panel=2, color='#ff7f0e', label='Signal'),
-        mpf.make_addplot(df['hist'],   panel=2, type='bar', color=macd_colors),
+        mpf.make_addplot(df[f'ma{p}'], panel=0, color=c, width=w,
+                         label=f'MA{p}', secondary_y=False)
+        for p, c, w in zip(MA_PERIODS, MA_COLORS, MA_WIDTHS)
+        if df[f'ma{p}'].notna().any()          # 历史不足、整列 NaN 时不画
+    ] + [
+        mpf.make_addplot(df['macd'],   panel=2, color='#1f77b4', label='MACD',   secondary_y=False),
+        mpf.make_addplot(df['signal'], panel=2, color='#ff7f0e', label='Signal', secondary_y=False),
+        mpf.make_addplot(df['hist'],   panel=2, type='bar', color=macd_colors,   secondary_y=False),
     ]
-
+    
     fig, axes = mpf.plot(
         df,
         type='candle',
